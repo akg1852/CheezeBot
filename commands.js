@@ -1,123 +1,17 @@
-var request = require('request'),
-	JSONStream = require('JSONStream'),
-	nodemailer = require('nodemailer'),
-	xml2js = require('xml2js'),
-	sqlite3 = require('sqlite3').verbose();
+var config = require("./config.js");
+var utility = require("./utility.js");
+var post = utility.post;
+var dbConnect = utility.dbConnect;
 
-// bot name
-var botName = "cheezebot";
+var xml2js = require('xml2js');
+var request = require('request');
 
-// credentials
-	// flowdock
-var apiToken = "",
-	flows = [],
-	// github
-	githubToken = "",
-	githubDomain = null, // null for default
-	// weather underground
-	wunderToken = "",
-	// youtube
-	youtubeToken = "",
-	// wolfram alpha
-	wolframToken = "";
-	
-// get flow data
-var flowData = {};
-for (var i = 0; i < flows.length; i++) {
-	request(encodeURI("https://" + apiToken + ":DUMMY@api.flowdock.com/flows/" + flows[i]), function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var flow = JSON.parse(body);
-			flowData[flow.id] = { name: flow.organization.parameterized_name + "/" + flow.parameterized_name, token: flow.api_token };
-		}
-		else console.error("Error getting flow data: " + JSON.stringify(error || response) + "\n");
-	});
-}
-
-// get user info
-var userInfo = {};
-function getUserInfo(id, callback) {
-	if (userInfo[id]) callback(userInfo[id]);
-		
-	else request(encodeURI("https://" + apiToken + ":DUMMY@api.flowdock.com/users/" + id),
-		function(error, response, body) {
-			if (!error && response.statusCode == 200) {
-				userInfo[id] = JSON.parse(body);
-				callback(userInfo[id]);
-			}
-			else console.error("Error requesting user info: " + JSON.stringify(error || response) + "\n");
-		});
-}
-
-// stream messages
-var stream = request(encodeURI("https://" + apiToken + ":DUMMY@stream.flowdock.com/flows?filter=" + flows.join(",")))
-	.pipe(JSONStream.parse());
-stream.on('data', function(context) {
-	if (context.event == "message" && typeof context.content == "string") {
-		
-		// check if message is for CheezeBot
-		var match = context.content.match(new RegExp("^\\s*" + botName + "\\s+([\\s\\S]+)", "i"));
-		if (match) {
-			var message = match[1];
-			
-			// post reply
-			var reply;
-			for (var i = 0; i < commands.length; i++) {
-				var command = commands[i];
-				var match = message.match(command.pattern);
-				if (match) {
-					reply = command.reply(match, context);
-					break;
-				}
-			}
-			if (reply != null && reply != undefined) post(reply, context);
-		}
-	}
-});
-stream.on('end', function() {
-	console.error("flowdock stream ended");
-	console.log(JSON.stringify(stream));
-	// todo: handle stream end more gracefully
-});
-stream.on('close', function() {
-	console.error("flowdock stream closed");
-	console.log(JSON.stringify(stream));
-	// todo: handle stream close more gracefully
-});
-stream.on('error', function(error) {
-	console.error("Error receiving stream data from flowdock: " + JSON.stringify(error) + "\n");
-	console.log(JSON.stringify(stream));
-	// todo: handle stream error more gracefully
-});
-
-// post a message
-function post(reply, context) {
-	var flow = flowData[context.flow];
-	var options = {
-		url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + flow.token),
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ "content": reply.toString(), "external_user_name": "CheezeBot" })
-	};
-	request(options, function(error, response, body) {
-		// log
-		if (!error && response.statusCode == 200) {
-			getUserInfo(context.user, function(user) {
-				console.log("---" + flow.name + "--- (" + now() + ")\n" + user.nick + ": " + context.content);
-				console.log("CheezeBot: " + reply + "\n");
-			})
-		}
-		else console.error("Error posting reply: " + JSON.stringify(error || response) + "\n");
-	});
-}
-
-
-// COMMANDS:
-var commands = [
+var commands = module.exports = [
 	{
 		description: "help:\t\t\t\tdisplay this message",
 		pattern: /^help/i,
 		reply: function() {
-			var help = "CheezeBot commands:";
+			var help = config.botName + " commands:";
 			for (var i = 0; i < commands.length; i++) {
 				var command = commands[i];
 				help += "\n\t" + command.description;
@@ -144,7 +38,7 @@ var commands = [
 		description: "video {search string}:\t\tshow a video based on a search string",
 		pattern: /^(?:video|youtube)\s+(.+)/i,
 		reply: function(match, context) {
-			request(encodeURI("https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&key=" + youtubeToken + "&q=" + match[1]),
+			request(encodeURI("https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&key=" + config.youtubeToken + "&q=" + match[1]),
 				function(error, response, body) {
 					if (!error && response.statusCode == 200) {
 						var videoData = JSON.parse(body).items[0];
@@ -160,12 +54,12 @@ var commands = [
 		pattern: /^pullrequests\s+(.+\/.+)/i,
 		reply: function(match, context) {
 			var repo = match[1].trim();
-			var domain = githubDomain ? githubDomain + "/api/v3" : "https://api.github.com";
+			var domain = config.githubDomain ? config.githubDomain + "/api/v3" : "https://api.github.com";
 			var options = {
-				url: encodeURI(domain + "/repos/" + repo + "/pulls?access_token=" + githubToken),
+				url: encodeURI(domain + "/repos/" + repo + "/pulls?access_token=" + config.githubToken),
 				method: "GET",
 				rejectUnauthorized: false,
-				headers: { "User-Agent": "CheezeBot" }
+				headers: { "User-Agent": config.BotName }
 			};
 			request(options, function(error, response, body) {
 				if (!error && response.statusCode == 200) {
@@ -222,7 +116,7 @@ var commands = [
 				if (!error && response.statusCode == 200) {
 					var cities = JSON.parse(body).RESULTS;
 					if (cities.length)  {
-						request(encodeURI("http://api.wunderground.com/api/" + wunderToken + "/forecast10day" + cities[0].l + ".json"),
+						request(encodeURI("http://api.wunderground.com/api/" + config.weatherUndergroundToken + "/forecast10day" + cities[0].l + ".json"),
 							function(error, response, body) {
 								if (!error && response.statusCode == 200) {
 									var forecast = JSON.parse(body).forecast;
@@ -231,7 +125,7 @@ var commands = [
 										var result = "Weather forecast for " + cities[0].name + ":";
 										for (var i = 0; i < 7; i++) {
 											var day = forecastDays[i];
-											result += "\n\t*  " + day.date.weekday + ":\t" + pad(20, day.conditions).substr(0, 20) + "| " +
+											result += "\n\t*  " + day.date.weekday + ":\t" + utility.pad(20, day.conditions).substr(0, 20) + "| " +
 													  day.high.celsius + "/" + day.low.celsius + "°C\t| " +
 													  day.avewind.kph + "kph " + day.avewind.dir;
 										}
@@ -252,7 +146,7 @@ var commands = [
 		description: "wolfram {search string}:\tsearch wolfram alpha",
 		pattern: /^wolfram\s+(.+)/i,
 		reply: function(match, context) {
-			request(encodeURI("http://api.wolframalpha.com/v2/query?appid=" + wolframToken + "&input=" + match[1]),
+			request(encodeURI("http://api.wolframalpha.com/v2/query?appid=" + config.wolframAlphaToken + "&input=" + match[1]),
 				function(error, response, body) {
 					if (!error && response.statusCode == 200) {
 						xml2js.parseString(body, function (error, result) {
@@ -277,8 +171,8 @@ var commands = [
 		description: "email {addr} {subj} \\n {msg}:\tsend email",
 		pattern: /^email\s+(\S+@\S+)\s+([^\n\r]+)\s+([\s\S]+)/i,
 		reply: function(match, context) {
-			getUserInfo(context.user, function(user) {
-				email({
+			utility.getUserInfo(context.user, function(user) {
+				utility.email({
 					from: user.name + " <" + user.email + ">",
 					to: match[1],
 					subject: match[2],
@@ -368,41 +262,3 @@ var commands = [
 		}
 	},
 ];
-
-
-// UTILITY FUNCTIONS:
-
-// current time
-function now() {
-	var d = new Date();
-	return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " +
-		d.getHours() + ":" + d.getMinutes();
-}
-
-// pad string to length
-function pad(len, str) {
-	while (str.length < len) str += " ";
-	return str;
-}
-
-// send an email
-function email(email, context) {
-	nodemailer.createTransport().sendMail(email, function(error, info) {
-		if (!error) {
-			var result = (info.rejected.length > 0) ? "Failed to send email" : "Email sent";
-			if (context) post(result, context);
-			else console.log(result);
-		}
-		else {
-			if (context) post("Unable to send email", context);
-			console.error("Error sending email: " + JSON.stringify(error) + "\n");
-		}
-	});
-}
-
-// connect to db
-function dbConnect(callback) {
-	var db = new sqlite3.Database('cheezebot.db');
-	callback(db);
-	db.close();
-}
