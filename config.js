@@ -4,6 +4,7 @@ module.exports = {
 	botName: "",
 	flowdockToken: "",
 	flows: [],
+	about: "",
 	
 	// COMMAND CONFIG:
 	githubToken: "",

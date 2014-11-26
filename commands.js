@@ -10,14 +10,7 @@ var commands = module.exports = [
 	{
 		description: "help:\t\t\t\tdisplay this message",
 		pattern: /^help/i,
-		reply: function() {
-			var help = config.botName + " commands:";
-			for (var i = 0; i < commands.length; i++) {
-				var command = commands[i];
-				help += "\n\t" + command.description;
-			}
-			return help;
-		}
+		reply: help
 	},
 	{
 		description: "gif {search string}:\t\tshow a gif based on a search string",
@@ -38,7 +31,8 @@ var commands = module.exports = [
 		description: "video {search string}:\t\tshow a video based on a search string",
 		pattern: /^(?:video|youtube)\s+(.+)/i,
 		reply: function(match, context) {
-			request(encodeURI("https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&key=" + config.youtubeToken + "&q=" + match[1]),
+			request(encodeURI("https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&key=" +
+			config.youtubeToken + "&q=" + match[1]),
 				function(error, response, body) {
 					if (!error && response.statusCode == 200) {
 						var videoData = JSON.parse(body).items[0];
@@ -116,7 +110,8 @@ var commands = module.exports = [
 				if (!error && response.statusCode == 200) {
 					var cities = JSON.parse(body).RESULTS;
 					if (cities.length)  {
-						request(encodeURI("http://api.wunderground.com/api/" + config.weatherUndergroundToken + "/forecast10day" + cities[0].l + ".json"),
+						request(encodeURI("http://api.wunderground.com/api/" + config.weatherUndergroundToken +
+						"/forecast10day" + cities[0].l + ".json"),
 							function(error, response, body) {
 								if (!error && response.statusCode == 200) {
 									var forecast = JSON.parse(body).forecast;
@@ -125,9 +120,10 @@ var commands = module.exports = [
 										var result = "Weather forecast for " + cities[0].name + ":";
 										for (var i = 0; i < 7; i++) {
 											var day = forecastDays[i];
-											result += "\n\t*  " + day.date.weekday + ":\t" + utility.pad(20, day.conditions).substr(0, 20) + "| " +
-													  day.high.celsius + "/" + day.low.celsius + "°C\t| " +
-													  day.avewind.kph + "kph " + day.avewind.dir;
+											result += "\n\t*  " + day.date.weekday + ":\t" +
+												utility.pad(20, day.conditions).substr(0, 20) + "| " +
+												day.high.celsius + "/" + day.low.celsius + "°C\t| " +
+												day.avewind.kph + "kph " + day.avewind.dir;
 										}
 										post(result, context);
 									}
@@ -252,13 +248,19 @@ var commands = module.exports = [
 		}
 	},
 	{
-		description: "about:\t\t\t\tdeveloper and source info",
+		description: "about:\t\t\t\tabout " + config.botName,
 		pattern: /^about/i,
 		reply: function() {
-			return ["CheezeBot by Adam-G", "Source: git.io/1roJvQ", "Suggestions or contributions welcome.",,
-			"API Credits:", "FLOWDOCK.com/api", "WUNDERGROUND.com/weather/api", "developer.GITHUB.com/v3/",
-			"github.com/GIPHY/giphyapi", "CATFACTS-api.appspot.com", "developers.GOOGLE.com/youtube/v3/",
-			"http://products.WOLFRAMALPHA.com/api/"].join("\n");
+			return config.about;
 		}
 	},
 ];
+
+function help() {
+	var s = config.botName + " commands:";
+	for (var i = 0; i < commands.length; i++) {
+		var command = commands[i];
+		s += "\n\t" + command.description;
+	}
+	return s;
+};
