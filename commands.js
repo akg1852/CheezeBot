@@ -235,19 +235,6 @@ var commands = module.exports = [
 		}
 	},
 	{
-		description: "catfact:\t\t\tthankyou for signing up for cat facts",
-		pattern: /^catfact/i,
-		reply: function(match, context) {
-			request("http://catfacts-api.appspot.com/api/facts?number=1",
-				function(error, response, body) {
-					if (!error && response.statusCode == 200) {
-						post(JSON.parse(body).facts[0], context);
-					}
-					else console.error("Error requesting cat fact: " + JSON.stringify(error || response) + "\n");
-				});
-		}
-	},
-	{
 		description: "about:\t\t\t\tabout " + config.botName,
 		pattern: /^about/i,
 		reply: function() {

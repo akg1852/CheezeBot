@@ -4,7 +4,11 @@ module.exports = {
 	botName: "",
 	flowdockToken: "",
 	flows: [],
-	about: "",
+	about: ["CheezeBot by Adam-G",
+		"Source: github.com/akg1852/CheezeBot/", "Suggestions or contributions welcome.",,
+		"API Credits:", "FLOWDOCK.com/api",
+		"WUNDERGROUND.com/weather/api", "developer.GITHUB.com/v3/", "github.com/GIPHY/giphyapi",
+		"developers.GOOGLE.com/youtube/v3/", "http://products.WOLFRAMALPHA.com/api/"].join("\n"),
 	
 	// COMMAND CONFIG:
 	githubToken: "",

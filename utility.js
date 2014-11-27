@@ -42,14 +42,13 @@ var utility = module.exports = {
 			body: JSON.stringify({ "content": reply.toString(), "external_user_name": config.botName })
 		};
 		request(options, function(error, response, body) {
-			// log
 			if (!error && response.statusCode == 200) {
 				utility.getUserInfo(context.user, function(user) {
-					console.log("---" + flow.name + "--- (" + utility.now() + ")\n" + user.nick + ": " + context.content);
+					console.log("\n---" + flow.name + "--- (" + utility.now() + ")\n" + user.nick + ": " + context.content);
 					console.log(config.botName + ": " + reply + "\n");
 				})
 			}
-			else console.error("Error posting reply: " + JSON.stringify(error || response) + "\n");
+			else console.error("Error posting reply: " + JSON.stringify(error || response));
 		});
 	},
 	
