@@ -235,6 +235,23 @@ var commands = module.exports = [
 		}
 	},
 	{
+		description: "when {condition} do {command}:\tconditional command\n\t\t\t\t\ttype 'when help' for more info",
+		pattern: /^when help/i,
+		reply: function(match) {
+			return ["Conditional commands. Full semantics are as follows:",
+				"\t[at {time}|in {duration}]",
+				"\t[when[ever] ({user}|someone) says (\"{condition}\"|something)]",
+				"\t[then] [do] ({command}|nothing)"].join("\n");
+		}
+	},
+	{
+		description: null, // say {message}: echo the message
+		pattern: /^(?:say|echo)\s+([\s\S]+)/i,
+		reply: function(match) {
+			return match[1];
+		}
+	},
+	{
 		description: "about:\t\t\t\tabout " + config.botName,
 		pattern: /^about/i,
 		reply: function() {
@@ -247,7 +264,7 @@ function help() {
 	var s = config.botName + " commands:";
 	for (var i = 0; i < commands.length; i++) {
 		var command = commands[i];
-		s += "\n\t" + command.description;
+		if (command.description) s += "\n\t" + command.description;
 	}
 	return s;
 };
