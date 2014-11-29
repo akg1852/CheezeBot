@@ -1,9 +1,7 @@
-var config = require("./config.js");
 var commands = require("./commands.js");
 var utility = require("./utility.js");
 
-var JSONStream = require('JSONStream');
-var request = require('request');
+var flowdock = require("./flowdock.js");
 
 var stream = {};
 function run() {
@@ -16,8 +14,7 @@ function run() {
 	console.log("connecting to flowdock stream");
 	
 	// connect to flowdock stream
-	stream = request(encodeURI("https://" + config.flowdockToken + ":DUMMY@stream.flowdock.com/flows?filter=" + config.flows.join(",")))
-	.pipe(JSONStream.parse());
+	stream = flowdock.getStream();
 	
 	// listen for messages
 	stream.on('data', function(context) {

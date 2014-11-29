@@ -1,8 +1,8 @@
 var config = require("./config.js");
 var utility = require("./utility.js");
-var post = utility.post;
 var dbConnect = utility.dbConnect;
-
+var flowdock = require("./flowdock.js");
+var post = flowdock.post;
 var xml2js = require('xml2js');
 var request = require('request');
 
@@ -167,7 +167,7 @@ var commands = module.exports = [
 		description: "email {addr} {subj} \\n {msg}:\tsend email",
 		pattern: /^email\s+(\S+@\S+)\s+([^\n\r]+)\s+([\s\S]+)/i,
 		reply: function(match, context) {
-			utility.getUserInfo(context.user, function(user) {
+			flowdock.getUserInfo(context.user, function(user) {
 				utility.email({
 					from: user.name + " <" + user.email + ">",
 					to: match[1],
