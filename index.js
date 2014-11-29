@@ -22,41 +22,9 @@ function run() {
 	// listen for messages
 	stream.on('data', function(context) {
 		if (context.event == "message" && typeof context.content == "string") {
-			
-			// process message
-			var query = "(?:(?:at\\s+(TIME)\\s+)|" + // 1: time
-				"(?:in\\s+(DURATION)\\s+))?" + // 2: duration
-				"(?:when(ever)?\\s+" + // 3: repeating
-				"(\\S+)\\s+says\\s+" + // 4: user
-				"(?:something|\"([^\"]+)\")\\s+)?" + // 5: condition
-				"(?:then\\s+)?(?:do\\s+)?" +
-				"([\\s\\S]+)"; // 6: command
-			var match = context.content.match(new RegExp("^\\s*" + config.botName + "\\s+" + query, "i"));
-			if (match) {
-				var message = {
-					flow: context.flow,
-					user: (match[4] == "someone") ? undefined : match[4],
-					time: 	match[3] ? undefined :
-							match[2] ? utility.now() + " + " + match[2] : // todo: the real time calculations
-							match[1],
-					condition: (match[5] == "something") ? undefined : match[5],
-					command: (match[6] == "nothing") ? undefined : match[6]
-				}
-				var reply;
-				
-				// check for matching command
-				for (var i = 0; i < commands.length; i++) {
-					var command = commands[i];
-					var match = message.command.match(command.pattern);
-					if (match) {
-						
-						// get reply from command
-						reply = command.reply(match, context);
-						break;
-					}
-				}
-				// post reply to flowdock
-				if (reply != null && reply != undefined) utility.post(reply, context);
+			var query = utility.matchQuery(context.content);
+			if (query) {
+				commands.execute(query.command, context);
 			}
 		}
 	});

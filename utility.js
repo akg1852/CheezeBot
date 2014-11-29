@@ -1,9 +1,9 @@
 var config = require("./config.js");
 var request = require('request');
 var sqlite3 = require('sqlite3').verbose();
+var userInfo = {};
 
 // get flowdock flow data
-// TODO: make this a utility method, similar to getUserInfo()
 var flowData = {};
 for (var i = 0; i < config.flows.length; i++) {
 	request(encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/flows/" + config.flows[i]), function(error, response, body) {
@@ -14,9 +14,29 @@ for (var i = 0; i < config.flows.length; i++) {
 		else console.error("Error getting flow data: " + JSON.stringify(error || response) + "\n");
 	});
 }
-var userInfo = {};
 
 var utility = module.exports = {
+	
+	// pattern match command query
+	matchQuery: function(query) {
+		var pattern = "(?:(?:at\\s+(\\d\\d?:\\d\\d)\\s+)|" + // 1: time
+			"(?:in\\s+([\\d.]+\\s*(?:second(?:s?)|minute(?:s?)|hour(?:s?)|day(?:s?)))\\s+))?" + // 2: duration
+			"(?:when(ever)?\\s+" + // 3: repeating
+			"(\\S+)\\s+says\\s+" + // 4: user
+			"(?:something|\"([^\"]+)\")\\s+)?" + // 5: condition
+			"(?:then\\s+)?(?:do\\s+)?" +
+			"([\\s\\S]+)"; // 6: command
+		var match = query.match(new RegExp("^\\s*" + config.botName + "\\s+" + pattern, "i"));
+		if (match) return {
+			user: (match[4] == "someone") ? undefined : match[4],
+			time: match[3] ? undefined
+				: match[2] ? utility.parseDuration(match[2]).getTime()
+				: match[1] ? utility.parseTime(match[1]).getTime()
+				: (new Date()).getTime(),
+			condition: (match[5] == "something") ? undefined : match[5],
+			command: (match[6] == "nothing") ? undefined : match[6]
+		};
+	},
 	
 	// get flowdock user info
 	getUserInfo: function(id, callback) {
@@ -57,6 +77,37 @@ var utility = module.exports = {
 		var d = new Date();
 		return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " +
 			d.getHours() + ":" + d.getMinutes();
+	},
+	
+	// parse time string
+	parseTime: function(timeString) {
+		var d = new Date();
+		if (typeof(timeString) == "string") {
+			d.setHours(parseInt(timeString));
+			d.setMinutes(parseInt(timeString.split(":")[1]));
+			d.setSeconds(0);
+			if (d < new Date()) d.setHours(d.getHours() + 24);
+		}
+		return d;
+	},
+	
+	// parse duration string
+	parseDuration: function(durationString) {
+		var d = new Date();
+		if (typeof(durationString) == "string") {
+			var duration = durationString.match(/^([\d.]+)\s*(second(?:s?)|minute(?:s?)|hour(?:s?)|day(?:s?))$/i) || [];
+			var value = parseFloat(duration[1]);
+			var units = duration[2];
+			
+			if (value && units) {
+				if (units.indexOf("day") != -1) d.setDate(d.getDate() + value);
+				else if (units.indexOf("hour") != -1) d.setHours(d.getHours() + value);
+				else if (units.indexOf("minute") != -1) d.setMinutes(d.getMinutes() + value);
+				else if (units.indexOf("second") != -1) d.setSeconds(d.getSeconds() + value);
+				else if (d < new Date()) d.setHours(d.getHours() + 24);
+			}
+		}
+		return d;
 	},
 	
 	// pad string to length
