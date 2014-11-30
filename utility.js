@@ -1,5 +1,5 @@
 var config = require("./config.js");
-var flowdock = require("./flowdock.js");
+var post = require("./flowdock.js").post;
 var sqlite3 = require('sqlite3').verbose();
 
 var utility = module.exports = {
@@ -10,7 +10,7 @@ var utility = module.exports = {
 			"(?:in\\s+([\\d.]+\\s*(?:second(?:s?)|minute(?:s?)|hour(?:s?)|day(?:s?)))\\s+))?" + // 2: duration
 			"(?:when(ever)?\\s+" + // 3: repeating
 			"(\\S+)\\s+says\\s+" + // 4: user
-			"(?:something|\"([^\"]+)\")\\s+)?" + // 5: condition
+			"(?:something|[\"“]([^\"”]+)[\"”])\\s+)?" + // 5: condition
 			"(?:then\\s+)?(?:do\\s+)?" +
 			"([\\s\\S]+)"; // 6: command
 		var match = query.match(new RegExp("^\\s*" + config.botName + "\\s+" + pattern, "i"));
@@ -20,7 +20,7 @@ var utility = module.exports = {
 				: match[2] ? utility.parseDuration(match[2]).getTime()
 				: match[1] ? utility.parseTime(match[1]).getTime()
 				: (new Date()).getTime(),
-			condition: (match[5] == "something") ? undefined : match[5],
+			condition: (match[4] && !match[5]) ? "" : match[5],
 			command: (match[6] == "nothing") ? undefined : match[6]
 		};
 	},
@@ -32,6 +32,7 @@ var utility = module.exports = {
 			d.setHours(parseInt(timeString));
 			d.setMinutes(parseInt(timeString.split(":")[1]));
 			d.setSeconds(0);
+			d.setMilliseconds(0);
 			if (d < new Date()) d.setHours(d.getHours() + 24);
 		}
 		return d;
@@ -67,11 +68,11 @@ var utility = module.exports = {
 		require('nodemailer').createTransport().sendMail(email, function(error, info) {
 			if (!error) {
 				var result = (info.rejected.length > 0) ? "Failed to send email" : "Email sent";
-				if (context) flowdock.post(result, context);
+				if (context) post(result, context);
 				else console.log(result);
 			}
 			else {
-				if (context) flowdock.post("Unable to send email", context);
+				if (context) post("Unable to send email", context);
 				console.error("Error sending email: " + JSON.stringify(error) + "\n");
 			}
 		});

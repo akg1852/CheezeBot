@@ -167,7 +167,7 @@ var commands = module.exports = [
 		description: "email {addr} {subj} \\n {msg}:\tsend email",
 		pattern: /^email\s+(\S+@\S+)\s+([^\n\r]+)\s+([\s\S]+)/i,
 		reply: function(match, context) {
-			flowdock.getUserInfo(context.user, function(user) {
+			flowdock.getUserInfo(context, function(user) {
 				utility.email({
 					from: user.name + " <" + user.email + ">",
 					to: match[1],
@@ -281,5 +281,5 @@ commands.execute = function(command, context) {
 			break;
 		}
 	}
-	if (reply != null && reply != undefined) utility.post(reply, context);
+	if (reply != null && reply != undefined) post(reply, context);
 };

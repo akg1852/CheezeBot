@@ -24,7 +24,10 @@ var flowdock = module.exports = {
 	},
 	
 	// get user info
-	getUserInfo: function(id, callback) {
+	getUserInfo: function(context, callback) {
+		var id = context.user;
+		var anon = context.external_user_name;
+		if (anon) userInfo[id] = { nick: anon, name: anon };
 		if (userInfo[id]) callback(userInfo[id]);
 			
 		else request(encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/users/" + id),
@@ -48,10 +51,10 @@ var flowdock = module.exports = {
 		};
 		request(options, function(error, response, body) {
 			if (!error && response.statusCode == 200) {
-				flowdock.getUserInfo(context.user, function(user) {
+				flowdock.getUserInfo(context, function(user) {
 					console.log("\n---" + flow.name + "--- (" + now() + ")\n" + user.nick + ": " + context.content);
 					console.log(config.botName + ": " + reply + "\n");
-				})
+				});
 			}
 			else console.error("Error posting reply: " + JSON.stringify(error || response));
 		});
