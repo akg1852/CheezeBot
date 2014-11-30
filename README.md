@@ -1,6 +1,7 @@
 CheezeBot is a FlowDock bot created by Adam Gray.
 
 Once you have cloned the project, setup involves making some changes:
+
 * edit config.js
 	* botName is the name you want the bot to be summoned by
 	* flowdockToken is your flowdock user's api token
@@ -18,5 +19,6 @@ Once you have cloned the project, setup involves making some changes:
 	  (alternatively, 'reply' can call the 'post' method directly, which is useful inside a callback)
 
 Now you're ready to run the bot:
+
 * "npm install" the required packages
 * run the bot by typing "node index.js" from the terminal
