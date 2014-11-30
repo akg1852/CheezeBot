@@ -3,6 +3,7 @@ var utility = require("./utility.js");
 var dbConnect = utility.dbConnect;
 var flowdock = require("./flowdock.js");
 var post = flowdock.post;
+var when = require('./when.js');
 var xml2js = require('xml2js');
 var request = require('request');
 
@@ -235,13 +236,17 @@ var commands = module.exports = [
 		}
 	},
 	{
-		description: "when {condition} do {command}:\tconditional command\n\t\t\t\t\ttype 'when help' for more info",
-		pattern: /^when help/i,
-		reply: function(match) {
-			return ["Conditional commands. Full semantics are as follows:",
-				"\t[at {time} | in {duration}]",
-				"\t[when[ever] ({user} | someone) says (\"{regex}\" | something)]",
-				"\t[then] ([do] ({command} | nothing) | say {message})"].join("\n");
+		description: "when {condition} do {command}:\tconditional command\n\t\t\t\t\t(see: 'when help' and 'when list')",
+		pattern: /^when (help|list)/i,
+		reply: function(match, context) {
+			switch (match[1]) {
+				case "help":
+					return ["Conditional commands. Full semantics are as follows:",
+						"\t[at {time} | in {duration}]",
+						"\t[when[ever] ({user} | someone) says (\"{string}\" | something)]",
+						"\t[then] ([do] ({command} | nothing) | say {message})"].join("\n");
+				case "list": when.list(context);
+			}
 		}
 	},
 	{

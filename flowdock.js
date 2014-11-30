@@ -1,19 +1,9 @@
 var config = require("./config.js");
 var request = require('request');
 var JSONStream = require('JSONStream');
-var userInfo = {};
 
-// get flow data
 var flowData = {};
-for (var i = 0; i < config.flows.length; i++) {
-	request(encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/flows/" + config.flows[i]), function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var flow = JSON.parse(body);
-			flowData[flow.id] = { name: flow.organization.parameterized_name + "/" + flow.parameterized_name, token: flow.api_token };
-		}
-		else console.error("Error getting flow data: " + JSON.stringify(error || response) + "\n");
-	});
-}
+var userInfo = {};
 
 var flowdock = module.exports = {
 	
@@ -25,11 +15,14 @@ var flowdock = module.exports = {
 	
 	// get user info
 	getUserInfo: function(context, callback) {
-		var id = context.user;
-		var anon = context.external_user_name;
-		if (anon) userInfo[id] = { nick: anon, name: anon };
+		var id = parseInt(context.user) || 0;
+		if (!id) {
+			var name = context.external_user_name || config.botName;
+			userInfo[id] = { nick: name, name: name };
+		}
+		
 		if (userInfo[id]) callback(userInfo[id]);
-			
+		
 		else request(encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/users/" + id),
 			function(error, response, body) {
 				if (!error && response.statusCode == 200) {
@@ -42,24 +35,45 @@ var flowdock = module.exports = {
 	
 	// post a message
 	post: function(reply, context) {
-		var flow = flowData[context.flow];
-		var options = {
-			url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + flow.token),
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ "content": reply.toString(), "external_user_name": config.botName })
-		};
-		request(options, function(error, response, body) {
-			if (!error && response.statusCode == 200) {
-				flowdock.getUserInfo(context, function(user) {
-					console.log("\n---" + flow.name + "--- (" + now() + ")\n" + user.nick + ": " + context.content);
-					console.log(config.botName + ": " + reply + "\n");
-				});
-			}
-			else console.error("Error posting reply: " + JSON.stringify(error || response));
+		getFlowData(context.flow, function(flow) {
+			var options = {
+				url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + flow.token),
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ "content": reply.toString(), "external_user_name": config.botName })
+			};
+			request(options, function(error, response, body) {
+				if (!error && response.statusCode == 200) {
+					flowdock.getUserInfo(context, function(user) {
+						console.log("\n---" + flow.name + "--- (" + now() + ")\n" + user.nick + ": " + context.content);
+						console.log(config.botName + ": " + reply + "\n");
+					});
+				}
+				else console.error("Error posting reply: " + JSON.stringify(error || response));
+			});
 		});
 	},
 };
+
+// get flow data
+function getFlowData(flowID, callback) {
+	var responses = 0;
+	if (flowData[flowID]) callback(flowData[flowID]);
+	
+	else for (var i = 0; i < config.flows.length; i++) {
+		request(encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/flows/" +
+			config.flows[i]), function(error, response, body) {
+			responses++;
+			if (!error && response.statusCode == 200) {
+				var flow = JSON.parse(body);
+				flowData[flow.id] = { name: flow.organization.parameterized_name + "/" + flow.parameterized_name, token: flow.api_token };
+			}
+			else console.error("Error getting flow data: " + JSON.stringify(error || response) + "\n");
+			
+			if (responses == config.flows.length) callback(flowData[flowID]);
+		});
+	}
+}
 
 // current date and time string
 function now() {

@@ -1,29 +1,7 @@
-var config = require("./config.js");
 var post = require("./flowdock.js").post;
 var sqlite3 = require('sqlite3').verbose();
 
 var utility = module.exports = {
-	
-	// pattern match command query
-	matchQuery: function(query) {
-		var pattern = "(?:(?:at\\s+(\\d\\d?:\\d\\d)\\s+)|" + // 1: time
-			"(?:in\\s+([\\d.]+\\s*(?:second(?:s?)|minute(?:s?)|hour(?:s?)|day(?:s?)))\\s+))?" + // 2: duration
-			"(?:when(ever)?\\s+" + // 3: repeating
-			"(\\S+)\\s+says\\s+" + // 4: user
-			"(?:something|[\"“]([^\"”]+)[\"”])\\s+)?" + // 5: condition
-			"(?:then\\s+)?(?:do\\s+)?" +
-			"([\\s\\S]+)"; // 6: command
-		var match = query.match(new RegExp("^\\s*" + config.botName + "\\s+" + pattern, "i"));
-		if (match) return {
-			user: (match[4] == "someone") ? undefined : match[4],
-			time: match[3] ? undefined
-				: match[2] ? utility.parseDuration(match[2]).getTime()
-				: match[1] ? utility.parseTime(match[1]).getTime()
-				: (new Date()).getTime(),
-			condition: (match[4] && !match[5]) ? "" : match[5],
-			command: (match[6] == "nothing") ? undefined : match[6]
-		};
-	},
 	
 	// parse time string
 	parseTime: function(timeString) {
@@ -53,8 +31,16 @@ var utility = module.exports = {
 				else if (units.indexOf("second") != -1) d.setSeconds(d.getSeconds() + value);
 				else if (d < new Date()) d.setHours(d.getHours() + 24);
 			}
+			d.setSeconds(0);
+			d.setMilliseconds(0);
 		}
 		return d;
+	},
+	
+	// format unix time as time string
+	formatTime: function(time) {
+		var t = new Date(time);
+		return t.getHours() + ":" + ("0" + t.getMinutes()).substr(-2);
 	},
 	
 	// pad string to length
