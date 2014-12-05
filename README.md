@@ -8,7 +8,7 @@ Once you have cloned the project, setup involves making some changes:
 	* the `flows` array is a list of flows the bot listens to, in the format `"org/flow"`
 	* the `about` string is a user-readable description of the bot
 	* the other credentials are for specific command functionality
-* Edit the `commands.js` array to give the bot the functionality you require
+* Edit the `commands.js` array to give the bot the functionality you require.
 	Each command requires:
 	* a `description` for the help listing
 	* a regex `pattern` to trigger the command

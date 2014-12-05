@@ -65,8 +65,7 @@ var when = module.exports = {
 				$user: query.user, $currentTime: (new Date()).getTime() }, function(error) {
 					if (error) console.error("Error deleting 'when' rules: " + JSON.stringify(error));
 					else if (this.changes) {
-						post("'when' rules successfully deleted.", context);
-						console.log(this.changes + " rule" + (this.changes > 1 ? "s" : "") + " deleted");
+						post(this.changes + " 'when' rule" + (this.changes > 1 ? "s" : "") + " deleted", context);
 					}
 					else console.log("no 'when' rules matching query, nothing deleted");
 				}
