@@ -207,10 +207,20 @@ var commands = module.exports = [
 									var count = rows.length ? rows[0].count : 0;
 									if (command) {
 										eval("count" + command);
-										db.run("INSERT OR REPLACE INTO tally VALUES (?, ?, ?)", category, member, count, function(error) {
-											if (error) console.error("Error updating tally: " + JSON.stringify(error));
-											else postTally([{category: category, member: member, count: count}]);
-										});
+										if (count) {
+											db.run("INSERT OR REPLACE INTO tally VALUES (?, ?, ?)",
+												category, member, count, function(error) {
+												if (error) console.error("Error updating tally: " + JSON.stringify(error));
+												else postTally([{category: category, member: member, count: count}]);
+											});
+										}
+										else {
+											db.run("DELETE FROM tally WHERE category = ? AND member = ?",
+												category, member, function(error) {
+												if (error) console.error("Error deleting tally: " + JSON.stringify(error));
+												else postTally([{category: category, member: member, count: count}]);
+											});
+										}
 									}
 									else postTally([{category: category, member: member, count: count}]);
 								}
