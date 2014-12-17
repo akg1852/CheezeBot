@@ -5,6 +5,7 @@ var flowdock = require("./flowdock.js");
 var post = flowdock.post;
 
 var loadedDelayed = false;
+var times = {};
 
 var when = module.exports = {
 	
@@ -106,8 +107,12 @@ var when = module.exports = {
 				if (error) console.error("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(function(r) {
-						callback(r);
-						if (r.time) when.deleteByID(r.id);
+						var now = (new Date()).getTime();
+						if (!times[r.id] || (now - times[r.id] > config.wheneverRefactorySeconds * 1000)) {
+							callback(r);
+							if (r.time) when.deleteByID(r.id);
+							else times[r.id] = now;
+						}
 					});
 				}
 			});
@@ -121,7 +126,7 @@ var when = module.exports = {
 				context.flow, (new Date()).getTime(), day, function(error, rows) {
 				if (error) console.error("Error retrieving 'when' rules for list: " + JSON.stringify(error));
 				else if (rows.length) {
-					var result = ["List of all 'when' rules in the flow:"];
+					var result = ["List of all today's 'when' rules in the flow:"];
 					rows.forEach(function(r) {
 						result.push(
 							((r.time && r.time > (new Date()).getTime()) ? "at " + utility.formatTime(r.time) + " " : "") +

@@ -241,10 +241,15 @@ var commands = module.exports = [
 		reply: function(match, context) {
 			switch (match[1]) {
 				case "help":
-					return ["Conditional commands. Full semantics are as follows:",
+					var s = config.wheneverRefactorySeconds;
+					return [
+						"Conditional commands. Full semantics are as follows:",
 						"\t[at {time} | in {duration}]",
 						"\t[when[ever] ({user} | someone) says (\"{string}\" | something)]",
-						"\t[then] ([do] ({command} | nothing) | say {message})"].join("\n");
+						"\t[then] ([do] ({command} | nothing) | say {message})",
+						"note: 'whenever' rules have a " + 
+							((s >= 60) ? (Number((s/60).toFixed(1)) + " minute") : (s + " second")) + " refactory period"
+					].join("\n");
 				case "list": when.list(context);
 			}
 		}

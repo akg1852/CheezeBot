@@ -9,6 +9,7 @@ module.exports = {
 		"API Credits:", "FLOWDOCK.com/api",
 		"WUNDERGROUND.com/weather/api", "developer.GITHUB.com/v3/", "github.com/GIPHY/giphyapi",
 		"developers.GOOGLE.com/youtube/v3/", "http://products.WOLFRAMALPHA.com/api/"].join("\n"),
+	wheneverRefactorySeconds: 300,
 	
 	// COMMAND CONFIG:
 	githubToken: "",
