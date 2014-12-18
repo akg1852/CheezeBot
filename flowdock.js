@@ -34,7 +34,7 @@ var flowdock = module.exports = {
 	},
 	
 	// post a message
-	post: function(reply, context) {
+	post: function(reply, context, callback) {
 		getFlowData(context.flow, function(flow) {
 			var options = {
 				url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + flow.token),
@@ -47,6 +47,7 @@ var flowdock = module.exports = {
 					flowdock.getUserInfo(context, function(user) {
 						console.log("\n---" + flow.name + "--- (" + now() + ")\n" + user.nick + ": " + context.content);
 						console.log(config.botName + ": " + reply + "\n");
+						if (callback) callback();
 					});
 				}
 				else console.error("Error posting reply: " + JSON.stringify(error || response));
