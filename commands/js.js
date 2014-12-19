@@ -1,6 +1,7 @@
 var post = require("../flowdock.js").post;
 var dbConnect = require("../utility.js").dbConnect;
 var when = require("../when.js");
+var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
 
 module.exports = {
@@ -49,17 +50,20 @@ module.exports = {
 					db.get("SELECT * FROM js WHERE name = ?", name, function(error, row) {
 						if (error) console.error("Error reading js table: " + JSON.stringify(error));
 						else if (row) {
-							sandbox.run("var context = " + JSON.stringify(context) + "; (function(" +
-								row.params + "){" + row.code + "})(" + args + ")", function(output) {
-								if (output.console.length) {
-									output.console.forEach(function(value) {
-										post(value, context);
-									});
-								}
-								else {
-									post("[no output]", context);
-								}
-							});
+							var commandFlag = "<EXECUTE_BOT_COMMAND>";
+							sandbox.run("var context = " + JSON.stringify(context) + ", command = function(s) { print(\"" +
+								commandFlag + "\" + s); }; (function(" + row.params + "){" + row.code + "})(" + args + ")",
+								function(output) {
+									if (output.console.length) {
+										output.console.forEach(function(value) {
+											if (String(value).indexOf(commandFlag) == 0) {
+												commands.execute(value.slice(commandFlag.length).trim(), context);
+											}
+											else post(value, context);
+										});
+									}
+									else post("[no output]", context);
+								});
 						}
 						else post("There is no function with that name.", context);
 					});
