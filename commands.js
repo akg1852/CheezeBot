@@ -51,7 +51,7 @@ fs.readdir("commands", function(error, files) {
 })
 
 // execute command
-commands.execute = function(command, context) {
+commands.execute = function(command, context, callback) {
 	var reply;
 	for (var i = 0; i < commands.length; i++) {
 		var c = commands[i];
@@ -61,5 +61,6 @@ commands.execute = function(command, context) {
 			break;
 		}
 	}
-	if (reply != null && reply != undefined) post(reply, context);
+	if (reply != null && reply != undefined) post(reply, context, callback);
+	else callback();
 };
