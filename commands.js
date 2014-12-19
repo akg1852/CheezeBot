@@ -57,10 +57,9 @@ commands.execute = function(command, context, callback) {
 		var c = commands[i];
 		var match = command.match(c.pattern);
 		if (match) {
-			reply = c.reply(match, context);
+			reply = c.reply(match, context, callback);
 			break;
 		}
 	}
 	if (reply != null && reply != undefined) post(reply, context, callback);
-	else if (callback) callback();
 };

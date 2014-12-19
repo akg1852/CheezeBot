@@ -6,7 +6,7 @@ var request = require('request');
 module.exports = {
 		description: "weather {city}:\t\t\tweather forecast information",
 		pattern: /^weather\s+(.+)/i,
-		reply: function(match, context) {
+		reply: function(match, context, callback) {
 			request(encodeURI("http://autocomplete.wunderground.com/aq?query=" + match[1]), function(error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var cities = JSON.parse(body).RESULTS;
@@ -26,16 +26,19 @@ module.exports = {
 												day.high.celsius + "/" + day.low.celsius + "°C\t| " +
 												day.avewind.kph + "kph " + day.avewind.dir;
 										}
-										post(result, context);
+										post(result, context, callback);
 									}
-									else post("No weather information found", context);
+									else post("No weather information found", context, callback);
 								}
 								else console.error("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
 							});
 					}
-					else post("No city found matching search", context);
+					else post("No city found matching search", context, callback);
 				}
-				else console.error("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
+				else {
+					console.error("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
+					if (callback) callback();
+				}
 			});
 		}
 	};

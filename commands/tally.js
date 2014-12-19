@@ -4,7 +4,7 @@ var post = require("../flowdock.js").post;
 module.exports = {
 	description: "tally {category} [{member}]\n\t\t[++|--|+= n|-= n]:\tkeep a tally",
 	pattern: /^tally\s+(\S+)(?:\s+([^\s+-]*)\s*(\+\+|--|\+=\s*\d+|-=\s*\d+)?)?/i,
-	reply: function(match, context) {
+	reply: function(match, context, callback) {
 		var category = match[1];
 		var member = match[2];
 		var command = match[3];
@@ -13,18 +13,22 @@ module.exports = {
 				"(category TEXT, member TEXT, count INT, PRIMARY KEY (category, member))", function(error) {
 				if (error) {
 					console.error("Error creating tally table in database: " + JSON.stringify(error));
+					if (callback) callback();
 				}
 				else {
 					db.all("SELECT * FROM tally WHERE category LIKE ? AND member LIKE ?",
 						category, member || "%", function(error, rows) {
-						if (error) console.error("Error reading tally: " + JSON.stringify(error));
+						if (error) {
+							console.error("Error reading tally: " + JSON.stringify(error));
+							if (callback) callback();
+						}
 						else {
 							var postTally = function(rows) {
 								var result = "";
 								for (var i = 0; i < rows.length; i++) {
 									result += "\n\t" + rows[i].member + ": " + rows[i].count;
 								}
-								post("Tally for " + category + ":" + result, context);
+								post("Tally for " + category + ":" + result, context, callback);
 							};
 							if (member) {
 								var count = rows.length ? rows[0].count : 0;
@@ -33,14 +37,20 @@ module.exports = {
 									if (count) {
 										db.run("INSERT OR REPLACE INTO tally VALUES (?, ?, ?)",
 											category, member, count, function(error) {
-											if (error) console.error("Error updating tally: " + JSON.stringify(error));
+											if (error) {
+												console.error("Error updating tally: " + JSON.stringify(error));
+												if (callback) callback();
+											}
 											else postTally([{category: category, member: member, count: count}]);
 										});
 									}
 									else {
 										db.run("DELETE FROM tally WHERE category = ? AND member = ?",
 											category, member, function(error) {
-											if (error) console.error("Error deleting tally: " + JSON.stringify(error));
+											if (error) {
+												console.error("Error deleting tally: " + JSON.stringify(error));
+												if (callback) callback();
+											}
 											else postTally([{category: category, member: member, count: count}]);
 										});
 									}

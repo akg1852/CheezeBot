@@ -50,7 +50,7 @@ var utility = module.exports = {
 	},
 	
 	// send an email
-	email: function(email, context) {
+	email: function(email, context, callback) {
 		require('nodemailer').createTransport().sendMail(email, function(error, info) {
 			if (!error) {
 				var result = (info.rejected.length > 0) ? "Failed to send email" : "Email sent";
@@ -60,6 +60,7 @@ var utility = module.exports = {
 			else {
 				if (context) post("Unable to send email", context);
 				console.error("Error sending email: " + JSON.stringify(error) + "\n");
+				if (callback) callback();
 			}
 		});
 	},

@@ -6,7 +6,7 @@ var xml2js = require('xml2js');
 module.exports = {
 	description: "wolfram {search string}:\tsearch wolfram alpha",
 	pattern: /^wolfram\s+(.+)/i,
-	reply: function(match, context) {
+	reply: function(match, context, callback) {
 		request(encodeURI("http://api.wolframalpha.com/v2/query?appid=" + config.wolframAlphaToken + "&input=" + match[1]),
 			function(error, response, body) {
 				if (!error && response.statusCode == 200) {
@@ -19,12 +19,15 @@ module.exports = {
 									});
 								})).filter(function(t) { return t != null; }).join("\n");
 								return podText ? p.$.title + ": \n" + podText : null;
-							})).filter(function(t) { return t != null; }).join("\n"), context);
+							})).filter(function(t) { return t != null; }).join("\n"), context, callback);
 						}
-						else post("No wolfram results found", context);
+						else post("No wolfram results found", context, callback);
 					});
 				}
-				else console.error("Error requesting wolfram alpha information: " + JSON.stringify(error || response) + "\n");
+				else {
+					console.error("Error requesting wolfram alpha information: " + JSON.stringify(error || response) + "\n");
+					if (callback) callback();
+				}
 			});
 	}
 };

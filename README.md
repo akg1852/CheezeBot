@@ -15,6 +15,7 @@ Once you have cloned the project, setup involves making some changes:
 	* a `reply` method, which returns the bot's reply, or null for no reply (alternatively, `reply` can call the `post` method (from `flowdock.js`) directly, which is useful inside a callback). The `reply` method takes the following parameters:
 		* the regex `match` array
 		* the flowdock stream `context` object
+		* a `callback` function. If a code branch in `reply` terminates without returning a value, the `callback` needs to be called, if present (or passed on, if the branch terminates with an asychronous method such as `post`).
 
 Now you're ready to run the bot:
 

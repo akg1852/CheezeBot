@@ -8,33 +8,40 @@ var sandbox = new (require("sandbox"))();
 module.exports = {
 	description: "js {name}({params}) [\\n {code}]: create/run custom js code\n\t\t\t\t\t(see: 'js help')",
 	pattern: /^js\s+(?:(help|list|delete\s+(\S+))|(?:(\S+)\s*\(([^\n\r]*)\)\s*(?:[\n\r]+([\s\S]+))?))$/i,
-	reply: function(match, context) {
+	reply: function(match, context, callback) {
 		dbConnect(function(db) {
 			db.run("CREATE TABLE IF NOT EXISTS js" +
 				"(name TEXT, params TEXT, code TEXT, PRIMARY KEY (name))", function(error) {
 				if (error) {
 					console.error("Error creating js table in database: " + JSON.stringify(error));
+					if (callback) callback();
 				}
 				else if (match[2]) { // delete function
 					var name = match[2];
 					db.run("DELETE FROM js WHERE name = ?", name, function(error) {
-						if (error) console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
-						else if (this.changes) post("Deleted js function '" + name + "'.", context);
-						else post("No js function '" + name + "', nothing deleted.", context);
+						if (error) {
+							console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
+							if (callback) callback();
+						}
+						else if (this.changes) post("Deleted js function '" + name + "'.", context, callback);
+						else post("No js function '" + name + "', nothing deleted.", context, callback);
 					});
 				}
 				else if (match[1]) {
 					if (match[1] == "list") { // list functions
 						db.all("SELECT * FROM js", function(error, rows) {
-							if (error) console.error("Error retrieving js functions from db: " + JSON.stringify(error));
+							if (error) {
+								console.error("Error retrieving js functions from db: " + JSON.stringify(error));
+								if (callback) callback();
+							}
 							else if (rows.length) {
 								var result = ["List of all user-defined js functions:" + when.noTrigger];
 								rows.forEach(function(r) {
 									result.push(r.name + "(" + r.params + ")");
 								});
-								post(result.join("\n\t"), context);
+								post(result.join("\n\t"), context, callback);
 							}
-							else post("No js functions to display.", context);
+							else post("No js functions to display.", context, callback);
 						});
 					}
 					else { // help
@@ -50,7 +57,7 @@ module.exports = {
 							"Inside the {code} block of a function definition, access is provided to the following:",
 							"\tvar context = {\n\t\t/* the flowdock context of the function call */\n\t};",
 							"\tvar command = function(\"{command}\") {\n\t\t/* call " + config.botName + "'s {command} */\n\t};"
-						].join("\n"), context);
+						].join("\n"), context, callback);
 					}
 				}
 				else if (match[5]) { // define function
@@ -58,15 +65,21 @@ module.exports = {
 					var params = match[4];
 					var code = match[5];
 					db.run("INSERT OR REPLACE INTO js VALUES (?, ?, ?)", name, params, code, function(error) {
-						if (error) console.error("Error updating js table: " + JSON.stringify(error));
-						else post("Thanks for the new function.", context);
+						if (error) {
+							console.error("Error updating js table: " + JSON.stringify(error));
+							if (callback) callback();
+						}
+						else post("Thanks for the new function.", context, callback);
 					});
 				}
 				else { // call function
 					var name = match[3];
 					var args = match[4];
 					db.get("SELECT * FROM js WHERE name = ?", name, function(error, row) {
-						if (error) console.error("Error reading js table: " + JSON.stringify(error));
+						if (error) {
+							console.error("Error reading js table: " + JSON.stringify(error));
+							if (callback) callback();
+						}
 						else if (row) {
 							var commandFlag = "<EXECUTE_BOT_COMMAND>";
 							sandbox.run("var context = " + JSON.stringify(context) + ", command = function(s) { print(\"" +
@@ -82,13 +95,14 @@ module.exports = {
 												}
 												else post(value, context, jsOut);
 											}
+											else if (callback) callback();
 										};
 										jsOut();
 									}
-									else post("[no output]", context);
+									else post("[no output]", context, callback);
 								});
 						}
-						else post("There is no function with that name.", context);
+						else post("There is no function with that name.", context, callback);
 					});
 				}
 			});

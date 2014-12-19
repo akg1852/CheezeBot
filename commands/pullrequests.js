@@ -5,7 +5,7 @@ var request = require('request');
 module.exports = {
 	description: "pullrequests {user}/{repo}:\tlist open pull requests",
 	pattern: /^pullrequests\s+(.+\/.+)/i,
-	reply: function(match, context) {
+	reply: function(match, context, callback) {
 		var repo = match[1].trim();
 		var domain = config.githubDomain ? config.githubDomain + "/api/v3" : "https://api.github.com";
 		var options = {
@@ -23,11 +23,14 @@ module.exports = {
 						var pr = prs[i];
 						result += "\n\t*  " + pr.title + ": " + pr.html_url;
 					}
-					post(result, context);
+					post(result, context, callback);
 				}
-				else post("no open pull requests for " + repo, context);
+				else post("no open pull requests for " + repo, context, callback);
 			}
-			else console.error("Error requesting github data: " + JSON.stringify(error || response) + "\n");
+			else {
+				console.error("Error requesting github data: " + JSON.stringify(error || response) + "\n");
+				if (callback) callback();
+			}
 		});
 	}
 };
