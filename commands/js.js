@@ -72,13 +72,18 @@ module.exports = {
 							sandbox.run("var context = " + JSON.stringify(context) + ", command = function(s) { print(\"" +
 								commandFlag + "\" + s); }; (function(" + row.params + "){" + row.code + "})(" + args + ")",
 								function(output) {
-									if (output.console.length) {
-										output.console.forEach(function(value) {
-											if (String(value).indexOf(commandFlag) == 0) {
-												commands.execute(value.slice(commandFlag.length).trim(), context);
+									var l = output.console.length, i = 0;;
+									if (l) {
+										var jsOut = function() {
+											if (i < l) {
+												var value = output.console[i++];
+												if (String(value).indexOf(commandFlag) == 0) {
+													commands.execute(value.slice(commandFlag.length).trim(), context, jsOut);
+												}
+												else post(value, context, jsOut);
 											}
-											else post(value, context);
-										});
+										};
+										jsOut();
 									}
 									else post("[no output]", context);
 								});
