@@ -8,6 +8,7 @@ var sandbox = new (require("sandbox"))();
 module.exports = {
 	description: "js {name}({params}) [\\n {code}]: create/run custom js code\n\t\t\t\t\t(see: 'js help')",
 	pattern: /^js\s+(?:(help|list|delete\s+(\S+))|(?:(\S+)\s*\(([^\n\r]*)\)\s*(?:[\n\r]+([\s\S]+))?))$/i,
+	priority: -10,
 	reply: function(match, context, callback) {
 		dbConnect(function(db) {
 			db.run("CREATE TABLE IF NOT EXISTS js" +

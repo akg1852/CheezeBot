@@ -23,9 +23,14 @@ fs.readdir("commands", function(error, files) {
 		});
 		
 		// add commands from 'commands' folder to 'commands' array
-		for (var i = 0; i < files.length; i++) {
-			commands.push(require("./commands/" + files[i]));
-		}
+		commands = commands.concat(files
+			.map(function(f) {
+				return require("./commands/" + f);
+			})
+			.sort(function(a, b) {
+				return (b.priority || 0) - (a.priority || 0);
+			})
+		);
 		
 		// 'when help' and 'when list' messages
 		commands.push(when.help);

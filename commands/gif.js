@@ -4,6 +4,7 @@ var request = require('request');
 module.exports = {
 	description: "gif {search string}:\t\tshow a gif based on a search string",
 	pattern: /^gif\s+(.+)/i,
+	priority: 10,
 	reply: function(match, context, callback) {
 		request(encodeURI("http://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&limit=1&q=" + match[1]),
 			function(error, response, body) {
