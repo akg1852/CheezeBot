@@ -40,7 +40,7 @@ var flowdock = module.exports = {
 				url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + flow.token),
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ "content": reply || "[no reply]", "external_user_name": config.botName })
+				body: JSON.stringify({ "content": String(reply) || "[no reply]", "external_user_name": config.botName })
 			};
 			request(options, function(error, response, body) {
 				if (!error && response.statusCode == 200) {

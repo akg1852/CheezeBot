@@ -62,5 +62,5 @@ commands.execute = function(command, context, callback) {
 		}
 	}
 	if (reply != null && reply != undefined) post(reply, context, callback);
-	else callback();
+	else if (callback) callback();
 };
