@@ -55,6 +55,7 @@ function run() {
 					else when.deleteByQuery(query, context);
 				}
 				else when.trigger(context, function(r) {
+					context.whenTriggered = true;
 					commands.execute(r.command, context);
 				});
 			}

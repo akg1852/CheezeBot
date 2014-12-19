@@ -49,7 +49,8 @@ module.exports = {
 					db.get("SELECT * FROM js WHERE name = ?", name, function(error, row) {
 						if (error) console.error("Error reading js table: " + JSON.stringify(error));
 						else if (row) {
-							sandbox.run("(function(" + row.params + "){" + row.code + "})(" + args + ")", function(output) {
+							sandbox.run("var context = " + JSON.stringify(context) + "; (function(" +
+								row.params + "){" + row.code + "})(" + args + ")", function(output) {
 								if (output.console.length) {
 									output.console.forEach(function(value) {
 										post(value, context);

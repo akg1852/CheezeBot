@@ -17,7 +17,7 @@ var flowdock = module.exports = {
 	getUserInfo: function(context, callback) {
 		var id = parseInt(context.user) || 0;
 		if (!id) {
-			var name = context.external_user_name || config.botName;
+			var name = context.external_user_name || "(anonymous)";
 			userInfo[id] = { nick: name, name: name };
 		}
 		
@@ -40,7 +40,7 @@ var flowdock = module.exports = {
 				url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + flow.token),
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ "content": reply.toString(), "external_user_name": config.botName })
+				body: JSON.stringify({ "content": reply, "external_user_name": config.botName })
 			};
 			request(options, function(error, response, body) {
 				if (!error && response.statusCode == 200) {
