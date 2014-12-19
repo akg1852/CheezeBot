@@ -28,25 +28,7 @@ fs.readdir("commands", function(error, files) {
 		}
 		
 		// 'when help' and 'when list' messages
-		commands.push({
-			description: "when {condition} do {command}:\tconditional command\n\t\t\t\t\t(see: 'when help' and 'when list')",
-			pattern: /^when (help|list)/i,
-			reply: function(match, context) {
-				switch (match[1]) {
-					case "help":
-						var s = config.wheneverRefactorySeconds;
-						return [
-							"Conditional commands. Full semantics are as follows:",
-							"\t[at {time} | in {duration}]",
-							"\t[when[ever] ({user} | someone) says (\"{string}\" | something)]",
-							"\t[then] ([do] ({command} | noCheezeBot2thing) | say {message})",
-							"note: 'whenever' rules have a " + 
-								((s >= 60) ? (Number((s/60).toFixed(1)) + " minute") : (s + " second")) + " refactory period"
-						].join("\n");
-					case "list": when.list(context);
-				}
-			}
-		});
+		commands.push(when.help);
 
 		// 'about' message
 		commands.push({

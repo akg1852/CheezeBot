@@ -1,3 +1,4 @@
+var config = require("../config.js");
 var post = require("../flowdock.js").post;
 var dbConnect = require("../utility.js").dbConnect;
 var when = require("../when.js");
@@ -5,8 +6,8 @@ var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
 
 module.exports = {
-	description: "js {name}({params}) [\\n {code}]: create/run custom js code\n\t\t\t\t\t(also: 'js list' and 'js delete {name}')",
-	pattern: /^js\s+(?:(list|delete\s+(\S+))|(?:(\S+)\s*\(([^\n\r]*)\)\s*(?:[\n\r]+([\s\S]+))?))$/i,
+	description: "js {name}({params}) [\\n {code}]: create/run custom js code\n\t\t\t\t\t(see: 'js help')",
+	pattern: /^js\s+(?:(help|list|delete\s+(\S+))|(?:(\S+)\s*\(([^\n\r]*)\)\s*(?:[\n\r]+([\s\S]+))?))$/i,
 	reply: function(match, context) {
 		dbConnect(function(db) {
 			db.run("CREATE TABLE IF NOT EXISTS js" +
@@ -22,18 +23,35 @@ module.exports = {
 						else post("No js function '" + name + "', nothing deleted.", context);
 					});
 				}
-				else if (match[1]) { // list functions
-					db.all("SELECT * FROM js", function(error, rows) {
-						if (error) console.error("Error retrieving js functions from db: " + JSON.stringify(error));
-						else if (rows.length) {
-							var result = ["List of all user-defined js functions:" + when.noTrigger];
-							rows.forEach(function(r) {
-								result.push(r.name + "(" + r.params + ")");
-							});
-							post(result.join("\n\t"), context);
-						}
-						else post("No js functions to display.", context);
-					});
+				else if (match[1]) {
+					if (match[1] == "list") { // list functions
+						db.all("SELECT * FROM js", function(error, rows) {
+							if (error) console.error("Error retrieving js functions from db: " + JSON.stringify(error));
+							else if (rows.length) {
+								var result = ["List of all user-defined js functions:" + when.noTrigger];
+								rows.forEach(function(r) {
+									result.push(r.name + "(" + r.params + ")");
+								});
+								post(result.join("\n\t"), context);
+							}
+							else post("No js functions to display.", context);
+						});
+					}
+					else { // help
+						post(["User-defined javascript functions!\n",
+							"Define a function:",
+							"\tjs {name}({param, param, ...}) \\n {code}",
+							"Call a function:",
+							"\tjs {name}({arg, arg, ...})",
+							"Delete a function:",
+							"\tjs delete {name}",
+							"List all functions:",
+							"\tjs list",
+							"Inside the {code} block of a function definition, access is provided to the following:",
+							"\tvar context = {\n\t\t/* the flowdock context of the function call */\n\t};",
+							"\tvar command = function(\"{command}\") {\n\t\t/* call " + config.botName + "'s {command} */\n\t};"
+						].join("\n"), context);
+					}
 				}
 				else if (match[5]) { // define function
 					var name = match[3];
