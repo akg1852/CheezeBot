@@ -37,7 +37,6 @@ module.exports = {
 				}
 				else {
 					console.error("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
-					if (callback) callback();
 				}
 			});
 		}

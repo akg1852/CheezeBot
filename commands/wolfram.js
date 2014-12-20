@@ -26,7 +26,6 @@ module.exports = {
 				}
 				else {
 					console.error("Error requesting wolfram alpha information: " + JSON.stringify(error || response) + "\n");
-					if (callback) callback();
 				}
 			});
 	}

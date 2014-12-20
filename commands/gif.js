@@ -15,7 +15,6 @@ module.exports = {
 				}
 				else {
 					console.error("Error requesting gif: " + JSON.stringify(error || response) + "\n");
-					if (callback) callback();
 				}
 			});
 	}

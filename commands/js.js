@@ -17,14 +17,12 @@ module.exports = {
 				"(name TEXT, params TEXT, code TEXT, PRIMARY KEY (name))", function(error) {
 				if (error) {
 					console.error("Error creating js table in database: " + JSON.stringify(error));
-					if (callback) callback();
 				}
 				else if (match[2]) { // delete function
 					var name = match[2];
 					db.run("DELETE FROM js WHERE name = ?", name, function(error) {
 						if (error) {
 							console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
-							if (callback) callback();
 						}
 						else if (this.changes) post("Deleted js function '" + name + "'.", context, callback);
 						else post("No js function '" + name + "', nothing deleted.", context, callback);
@@ -35,7 +33,6 @@ module.exports = {
 						db.all("SELECT * FROM js", function(error, rows) {
 							if (error) {
 								console.error("Error retrieving js functions from db: " + JSON.stringify(error));
-								if (callback) callback();
 							}
 							else if (rows.length) {
 								var result = ["List of all user-defined js functions:" + when.noTrigger];
@@ -76,7 +73,6 @@ module.exports = {
 					db.run("INSERT OR REPLACE INTO js VALUES (?, ?, ?)", name, params, code, function(error) {
 						if (error) {
 							console.error("Error updating js table: " + JSON.stringify(error));
-							if (callback) callback();
 						}
 						else post("Thanks for the new function.", context, callback);
 					});
@@ -87,7 +83,6 @@ module.exports = {
 					db.get("SELECT * FROM js WHERE name = ?", name, function(error, row) {
 						if (error) {
 							console.error("Error reading js table: " + JSON.stringify(error));
-							if (callback) callback();
 						}
 						else if (row) {
 							var commandFlag = "<EXECUTE_BOT_COMMAND>";

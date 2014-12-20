@@ -13,10 +13,10 @@ Once you have cloned the project, setup involves making some changes:
 	* a `description` for the help listing
 	* a regex `pattern` to trigger the command
 	* a `priority` (optional, 0 by default), which is a number used for determining the order in which commands are attempted to be matched against user input, and also for determining the order the commands appear in the help listing.
-	* a `reply` method, which returns the bot's reply, or null for no reply (alternatively, `reply` can call the `post` method (from `flowdock.js`) directly, which is useful inside a callback). The `reply` method takes the following parameters:
+	* a `reply` method, which generates the bot's reply, and needs to call the `post` method (from `flowdock.js`). The `reply` method takes the following parameters:
 		* the regex `match` array
 		* the flowdock stream `context` object
-		* a `callback` function. If a code branch in `reply` terminates without returning a value, the `callback` needs to be called, if present (or passed on, if the branch terminates with an asychronous method such as `post`).
+		* a `callback` function, which should be passed on to the `post` method, or called directly (if it exists) if `reply` has a successful termination state which doesn't result in a post.
 
 Now you're ready to run the bot:
 

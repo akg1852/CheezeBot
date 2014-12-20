@@ -13,14 +13,12 @@ module.exports = {
 				"(category TEXT, member TEXT, count INT, PRIMARY KEY (category, member))", function(error) {
 				if (error) {
 					console.error("Error creating tally table in database: " + JSON.stringify(error));
-					if (callback) callback();
 				}
 				else {
 					db.all("SELECT * FROM tally WHERE category LIKE ? AND member LIKE ?",
 						category, member || "%", function(error, rows) {
 						if (error) {
 							console.error("Error reading tally: " + JSON.stringify(error));
-							if (callback) callback();
 						}
 						else {
 							var postTally = function(rows) {
@@ -39,7 +37,6 @@ module.exports = {
 											category, member, count, function(error) {
 											if (error) {
 												console.error("Error updating tally: " + JSON.stringify(error));
-												if (callback) callback();
 											}
 											else postTally([{category: category, member: member, count: count}]);
 										});
@@ -47,10 +44,7 @@ module.exports = {
 									else {
 										db.run("DELETE FROM tally WHERE category = ? AND member = ?",
 											category, member, function(error) {
-											if (error) {
-												console.error("Error deleting tally: " + JSON.stringify(error));
-												if (callback) callback();
-											}
+											if (error) console.error("Error deleting tally: " + JSON.stringify(error));
 											else postTally([{category: category, member: member, count: count}]);
 										});
 									}

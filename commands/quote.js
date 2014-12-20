@@ -9,7 +9,6 @@ module.exports = {
 			db.run("CREATE TABLE IF NOT EXISTS quote (quote TEXT)", function(error) {
 				if (error) {
 					console.error("Error creating quote table in database: " + JSON.stringify(error));
-					if (callback) callback();
 				}
 				else if (typeof match[1] == "string") {
 					var quote = match[1].trim();
@@ -17,7 +16,6 @@ module.exports = {
 						db.run("INSERT INTO quote VALUES (?)", quote, function(error) {
 							if (error) {
 								console.error("Error writing quote: " + JSON.stringify(error));
-								if (callback) callback();
 							}
 							else post("Thanks for the new quote!", context, callback);
 						});
@@ -28,7 +26,6 @@ module.exports = {
 					db.all("SELECT * FROM quote", function(error, rows) {
 						if (error) {
 							console.error("Error reading quote: " + JSON.stringify(error));
-							if (callback) callback();
 						}
 						else if (!rows.length) post("No quotes available.", context, callback);
 						else post(rows[Math.floor(Math.random() * rows.length)].quote, context, callback);

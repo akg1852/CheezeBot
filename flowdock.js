@@ -52,7 +52,6 @@ var flowdock = module.exports = {
 				}
 				else {
 					console.error("Error posting reply: " + JSON.stringify(error || response));
-					if (callback) callback();
 				}
 			});
 		});

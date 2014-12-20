@@ -16,7 +16,6 @@ module.exports = {
 				}
 				else {
 					console.error("Error requesting video: " + JSON.stringify(error || response) + "\n");
-					if (callback) callback();
 				}
 			});
 	}
