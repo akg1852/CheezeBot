@@ -6,6 +6,7 @@ var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
 
 var shortcircuit = false;
+
 module.exports = {
 	description: "js {name}({params}) [\\n {code}]: create/run custom js code\n\t\t\t\t\t(see: 'js help')",
 	pattern: /^js\s+(?:(help|list|shortcircuit|delete\s+(\S+))|(?:(\S+)\s*\(([^\n\r]*)\)\s*(?:[\n\r]+([\s\S]+))?))$/i,
@@ -62,8 +63,9 @@ module.exports = {
 							"Stop a spammy function in it's tracks:",
 							"\tjs shortcircuit",
 							"Inside the {code} block of a function definition, access is provided to the following:",
+							"\tfunction post(\"{message text}\") {\n\t\t/* post a message */\n\t}",
+							"\tfunction command(\"{command text}\") {\n\t\t/* call a " + config.botName + " command */\n\t}",
 							"\tvar context = {\n\t\t/* the flowdock context of the function call */\n\t};",
-							"\tvar command = function(\"{command}\") {\n\t\t/* call " + config.botName + "'s {command} */\n\t};"
 						].join("\n"), context, callback);
 					}
 				}
@@ -89,8 +91,9 @@ module.exports = {
 						}
 						else if (row) {
 							var commandFlag = "<EXECUTE_BOT_COMMAND>";
-							sandbox.run("var context = " + JSON.stringify(context) + ", command = function(s) { print(\"" +
-								commandFlag + "\" + s); }; (function(" + row.params + "){" + row.code + "})(" + args + ")",
+							sandbox.run("var post = print, context = " + JSON.stringify(context) +
+								", command = function(s) { print(\"" + commandFlag + "\" + s); }; (function(" +
+								row.params + "){" + row.code + "})(" + args + ")",
 								function(output) {
 									var l = output.console.length, i = 0;;
 									if (l) {
