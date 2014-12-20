@@ -54,8 +54,11 @@ var utility = module.exports = {
 		require('nodemailer').createTransport().sendMail(email, function(error, info) {
 			if (!error) {
 				var result = (info.rejected.length > 0) ? "Failed to send email" : "Email sent";
-				if (context) post(result, context);
-				else console.log(result);
+				if (context) post(result, context, callback);
+				else {
+					console.log(result);
+					if (callback) callback();
+				}
 			}
 			else {
 				if (context) post("Unable to send email", context);
