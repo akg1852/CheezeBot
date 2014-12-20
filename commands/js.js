@@ -110,7 +110,7 @@ module.exports = {
 										};
 										jsOut();
 									}
-									else post("[no output]", context, callback);
+									else if (callback) callback();
 								});
 						}
 						else post("There is no function with that name.", context, callback);
