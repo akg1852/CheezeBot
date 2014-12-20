@@ -5,9 +5,10 @@ var when = require("../when.js");
 var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
 
+var shortcircuit = false;
 module.exports = {
 	description: "js {name}({params}) [\\n {code}]: create/run custom js code\n\t\t\t\t\t(see: 'js help')",
-	pattern: /^js\s+(?:(help|list|delete\s+(\S+))|(?:(\S+)\s*\(([^\n\r]*)\)\s*(?:[\n\r]+([\s\S]+))?))$/i,
+	pattern: /^js\s+(?:(help|list|shortcircuit|delete\s+(\S+))|(?:(\S+)\s*\(([^\n\r]*)\)\s*(?:[\n\r]+([\s\S]+))?))$/i,
 	priority: -10,
 	reply: function(match, context, callback) {
 		dbConnect(function(db) {
@@ -45,6 +46,9 @@ module.exports = {
 							else post("No js functions to display.", context, callback);
 						});
 					}
+					else if (match[1] == "shortcircuit") {
+						shortcircuit = true;
+					}
 					else { // help
 						post(["User-defined javascript functions!\n",
 							"Define a function:",
@@ -55,6 +59,8 @@ module.exports = {
 							"\tjs delete {name}",
 							"List all functions:",
 							"\tjs list",
+							"Stop a spammy function in it's tracks:",
+							"\tjs shortcircuit",
 							"Inside the {code} block of a function definition, access is provided to the following:",
 							"\tvar context = {\n\t\t/* the flowdock context of the function call */\n\t};",
 							"\tvar command = function(\"{command}\") {\n\t\t/* call " + config.botName + "'s {command} */\n\t};"
@@ -91,10 +97,16 @@ module.exports = {
 										var jsOut = function() {
 											if (i < l) {
 												var value = output.console[i++];
-												if (String(value).indexOf(commandFlag) == 0) {
-													commands.execute(value.slice(commandFlag.length).trim(), context, jsOut);
+												if (shortcircuit) {
+													shortcircuit = false;
+													post("Shortcircuited js function.", context);
 												}
-												else post(value, context, jsOut);
+												else {
+													if (String(value).indexOf(commandFlag) == 0) {
+														commands.execute(value.slice(commandFlag.length).trim(), context, jsOut);
+													}
+													else post(value, context, jsOut);
+												}
 											}
 											else if (callback) callback();
 										};
