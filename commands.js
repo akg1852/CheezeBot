@@ -12,13 +12,13 @@ fs.readdir("commands", function(error, files) {
 		commands.push({
 			description: "help:\t\t\t\tdisplay this message",
 			pattern: /^help/i,
-			reply: function() {
+			reply: function(match, context, callback) {
 				var s = config.botName + " commands:";
 				for (var i = 0; i < commands.length; i++) {
 					var command = commands[i];
 					if (command.description) s += "\n\t" + command.description;
 				}
-				return s;
+				post(s, context, callback);
 			}
 		});
 		
@@ -39,8 +39,8 @@ fs.readdir("commands", function(error, files) {
 		commands.push({
 			description: "about:\t\t\t\tabout " + config.botName,
 			pattern: /^about/i,
-			reply: function() {
-				return config.about;
+			reply: function(match, context, callback) {
+				post(config.about, context, callback);
 			}
 		});
 		
@@ -48,8 +48,8 @@ fs.readdir("commands", function(error, files) {
 		commands.push({
 			description: null,
 			pattern: /^(?:say|echo)\s+([\s\S]+)/i,
-			reply: function(match) {
-				return match[1];
+			reply: function(match, context, callback) {
+				post(match[1], context, callback);
 			}
 		});
 	}
@@ -57,14 +57,12 @@ fs.readdir("commands", function(error, files) {
 
 // execute command
 commands.execute = function(command, context, callback) {
-	var reply;
 	for (var i = 0; i < commands.length; i++) {
 		var c = commands[i];
 		var match = command.match(c.pattern);
 		if (match) {
-			reply = c.reply(match, context, callback);
+			c.reply(match, context, callback);
 			break;
 		}
 	}
-	if (reply != null && reply != undefined) post(reply, context, callback);
 };
