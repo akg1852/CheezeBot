@@ -97,7 +97,7 @@ module.exports = {
 												var value = output.console[i++];
 												if (shortcircuit) {
 													shortcircuit = false;
-													post("Shortcircuited js function.", context);
+													post("Shortcircuited js function '" + name + "'.", context);
 												}
 												else {
 													if (String(value).indexOf(commandFlag) == 0) {
@@ -113,7 +113,7 @@ module.exports = {
 									else if (callback) callback();
 								});
 						}
-						else post("There is no function with that name.", context, callback);
+						else post("There is no js function '" + name + "'.", context, callback);
 					});
 				}
 			});
