@@ -31,8 +31,6 @@ var utility = module.exports = {
 				else if (units.indexOf("second") != -1) d.setSeconds(d.getSeconds() + value);
 				else if (d < new Date()) d.setHours(d.getHours() + 24);
 			}
-			d.setSeconds(0);
-			d.setMilliseconds(0);
 		}
 		return d;
 	},

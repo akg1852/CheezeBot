@@ -33,50 +33,61 @@ var flowdock = module.exports = {
 			});
 	},
 	
-	// post a message
-	post: function(reply, context, callback) {
-		getFlowData(context.flow, function(flow) {
-			var options = {
-				url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + flow.token),
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ "content": String(reply) || "[no reply]", "external_user_name": config.botName })
-			};
-			request(options, function(error, response, body) {
+	// get flow data
+	getFlowData: function(flowID, callback) {
+		var responses = 0;
+		if (flowData[flowID]) callback(flowData[flowID]);
+		
+		else for (var i = 0; i < config.flows.length; i++) {
+			request(encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/flows/" +
+				config.flows[i]), function(error, response, body) {
+				responses++;
 				if (!error && response.statusCode == 200) {
-					flowdock.getUserInfo(context, function(user) {
-						console.log("\n---" + flow.name + "--- (" + now() + ")\n" + user.nick + ": " + context.content);
-						console.log(config.botName + ": " + reply + "\n");
-						if (callback) callback();
-					});
+					var flow = JSON.parse(body);
+					flowData[flow.id] = {
+						id: flow.id,
+						name: flow.organization.parameterized_name + "/" + flow.parameterized_name,
+						token: flow.api_token
+					};
 				}
-				else {
-					console.error("Error posting reply: " + JSON.stringify(error || response));
-				}
+				else console.error("Error getting flow data: " + JSON.stringify(error || response) + "\n");
+				
+				if (responses == config.flows.length) callback(flowData[flowID]);
+			});
+		}
+	},
+	
+	// set user and flow data
+	setMetaData: function(context, callback) {
+		flowdock.getFlowData(context.flow, function(flowData) {
+			flowdock.getUserInfo(context, function(userInfo) {
+				context.flow = flowData;
+				context.user = userInfo;
+				callback(context);
 			});
 		});
 	},
-};
-
-// get flow data
-function getFlowData(flowID, callback) {
-	var responses = 0;
-	if (flowData[flowID]) callback(flowData[flowID]);
 	
-	else for (var i = 0; i < config.flows.length; i++) {
-		request(encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/flows/" +
-			config.flows[i]), function(error, response, body) {
-			responses++;
+	// post a message
+	post: function(reply, context, callback) {
+		var options = {
+			url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + context.flow.token),
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ "content": String(reply) || "[no reply]", "external_user_name": config.botName })
+		};
+		request(options, function(error, response, body) {
 			if (!error && response.statusCode == 200) {
-				var flow = JSON.parse(body);
-				flowData[flow.id] = { name: flow.organization.parameterized_name + "/" + flow.parameterized_name, token: flow.api_token };
+				console.log("\n---" + context.flow.name + "--- (" + now() + ")\n" + context.user.nick + ": " + context.content);
+				console.log(config.botName + ": " + reply + "\n");
+				if (callback) callback();
 			}
-			else console.error("Error getting flow data: " + JSON.stringify(error || response) + "\n");
-			
-			if (responses == config.flows.length) callback(flowData[flowID]);
+			else {
+				console.error("Error posting reply: " + JSON.stringify(error || response));
+			}
 		});
-	}
-}
+	},
+};
 
 // current date and time string
 function now() {

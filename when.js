@@ -44,7 +44,7 @@ var when = module.exports = {
 	add: function(query, context, callback) {
 		dbConnect(function(db) {
 			db.run("INSERT INTO 'when' VALUES (?, ?, ?, ?, ?, ?)",
-				null, context.flow, query.time, query.user, query.condition, query.command, function(error) {
+				null, context.flow.id, query.time, query.user, query.condition, query.command, function(error) {
 				if (error) console.error("Error adding 'when' rules: " + JSON.stringify(error));
 				else {
 					post("Thanks for the new 'when' rule!", context);
@@ -62,7 +62,7 @@ var when = module.exports = {
 					"(condition IS NOT NULL AND time <= $currentTime AND $time <= $currentTime)) AND " +
 				"((condition IS NULL AND $condition IS NULL) OR condition LIKE $condition) AND " +
 				"((user IS NULL AND $user IS NULL) OR user LIKE $user)", {
-				$flow: context.flow, $time: query.time, $condition: query.condition,
+				$flow: context.flow.id, $time: query.time, $condition: query.condition,
 				$user: query.user, $currentTime: (new Date()).getTime() }, function(error) {
 					if (error) console.error("Error deleting 'when' rules: " + JSON.stringify(error));
 					else if (this.changes) {
@@ -100,11 +100,11 @@ var when = module.exports = {
 	},
 	
 	trigger: function(context, callback) {
-		flowdock.getUserInfo(context, function(user) { dbConnect(function(db) {
+		dbConnect(function(db) {
 			if (context.content.match(new RegExp(when.noTrigger, "i"))) return;
 			db.all("SELECT * FROM 'when' WHERE " +
 				"flow = ? AND (time IS NULL OR time <= ?) AND (? LIKE ('%' || condition || '%')) AND (user IS NULL OR user LIKE ?)",
-				context.flow, (new Date()).getTime(), context.content, user.nick, function(error, rows) {
+				context.flow.id, (new Date()).getTime(), context.content, context.user.nick, function(error, rows) {
 				if (error) console.error("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(function(r) {
@@ -117,7 +117,7 @@ var when = module.exports = {
 					});
 				}
 			});
-		})});
+		});
 	},
 	noTrigger: String.fromCharCode(8203),
 	
@@ -125,7 +125,7 @@ var when = module.exports = {
 		dbConnect(function(db) {
 			var day = 24 * 60 * 60 * 1000;
 			db.all("SELECT * FROM 'when' where flow = ? AND (time IS NULL OR (time - ?) < ?)",
-				context.flow, (new Date()).getTime(), day, function(error, rows) {
+				context.flow.id, (new Date()).getTime(), day, function(error, rows) {
 				if (error) console.error("Error retrieving 'when' rules for list: " + JSON.stringify(error));
 				else if (rows.length) {
 					var result = ["List of all today's 'when' rules in the flow:" + when.noTrigger];

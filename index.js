@@ -22,41 +22,48 @@ function run() {
 		
 		// get delayed commands
 		when.getDelayed(function(r) {
-			setTimeout(function() {
-				commands.execute(r.command, { flow: r.flow, content: "<time delay rule triggered>" });
-				when.deleteByID(r.id);
-			}, r.time - (new Date()).getTime());
+			flowdock.setMetaData({ flow: r.flow, content: "<time delay rule triggered>" }, function(context) {
+				setTimeout(function() {
+					commands.execute(r.command, context);
+					when.deleteByID(r.id);
+				}, r.time - (new Date()).getTime());
+			});
 		});
 		
 		// listen for messages
 		stream.on('data', function(context) {
 			if (context.event == "message" && typeof context.content == "string") {
-				var query = when.matchQuery(context.content);
-				if (query) {
-					if (query.command) {
-						if (query.condition != null){
-							when.add(query, context);
-						}
-						else if (query.time) {
-							var now = (new Date()).getTime();
-							if (query.time <= now) {
-								commands.execute(query.command, context);
+				flowdock.setMetaData(context, function(context) {
+					var query = when.matchQuery(context.content);
+					if (query) {
+						if (query.command) {
+							if (query.condition != null){
+								when.add(query, context);
 							}
-							else {
-								when.add(query, context, function(id) {
-									setTimeout(function() {
-										commands.execute(query.command, { flow: context.flow, content: "<time delay rule triggered>" });
-										when.deleteByID(id);
-									}, query.time - now);
-								});
+							else if (query.time) {
+								var now = (new Date()).getTime();
+								if (query.time <= now) {
+									commands.execute(query.command, context);
+								}
+								else {
+									when.add(query, context, function(id) {
+										setTimeout(function() {
+											commands.execute(query.command, {
+												flow: context.flow,
+												user: context.user,
+												content: "<time delay rule triggered>" });
+											when.deleteByID(id);
+										}, query.time - now);
+									});
+								}
 							}
 						}
+						else when.deleteByQuery(query, context);
 					}
-					else when.deleteByQuery(query, context);
-				}
-				else when.trigger(context, function(r) {
-					context.whenTriggered = true;
-					commands.execute(r.command, context);
+					else when.trigger(context, function(r) {
+						context.whenTriggered = true;
+						commands.execute(r.command, context);
+					});
 				});
 			}
 		});
