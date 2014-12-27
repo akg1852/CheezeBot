@@ -155,12 +155,15 @@ var when = module.exports = {
 						"Conditional commands. Full semantics are as follows:",
 						"\t[at {time} | in {duration}]",
 						"\t[when[ever] ({user} | someone) says (\"{string}\" | something)]",
-						"\t[then] ([do] ({command} | noCheezeBot2thing) | say {message})",
+						"\t[then] ([do] ({command} | nothing) | say {message})",
 						"'when list' lists all the current when rules",
 						"'whenever' rules have a " + 
 							((s >= 60) ? (Number((s/60).toFixed(1)) + " minute") : (s + " second")) + " refactory period"
 					].join("\n"), context, callback);
-				case "list": when.list(context);
+					break;
+				case "list":
+					when.list(context);
+					break;
 			}
 		}
 	}
