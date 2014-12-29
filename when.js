@@ -14,7 +14,7 @@ var when = module.exports = {
 			"(?:in\\s+([\\d.]+\\s*(?:second(?:s?)|minute(?:s?)|hour(?:s?)|day(?:s?)))\\s+))?" + // 2: duration
 			"(?:when(ever)?\\s+" + // 3: repeating
 			"(\\S+)\\s+says\\s+" + // 4: user
-			"(?:something|[\"“]([^\"”]+)[\"”])\\s+)?" + // 5: condition
+			"(?:something|/([^/]+)/)\\s+)?" + // 5: condition
 			"(?:then\\s+)?(?:do\\s+)?" +
 			"([\\s\\S]+)"; // 6: command
 		var match = query.match(new RegExp("^\\s*" + config.botName + "\\s+" + pattern, "i"));
@@ -103,13 +103,14 @@ var when = module.exports = {
 		dbConnect(function(db) {
 			if (context.content.match(new RegExp(when.noTrigger, "i"))) return;
 			db.all("SELECT * FROM 'when' WHERE " +
-				"flow = ? AND (time IS NULL OR time <= ?) AND (? LIKE ('%' || condition || '%')) AND (user IS NULL OR user LIKE ?)",
-				context.flow.id, (new Date()).getTime(), context.content, context.user.nick, function(error, rows) {
+				"flow = ? AND (time IS NULL OR time <= ?) AND (user IS NULL OR user LIKE ?)",
+				context.flow.id, (new Date()).getTime(), context.user.nick, function(error, rows) {
 				if (error) console.error("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(function(r) {
+						var match = !(r.condition && !context.content.match(new RegExp(r.condition, "i")));
 						var now = (new Date()).getTime();
-						if (!times[r.id] || (now - times[r.id] > config.wheneverRefactorySeconds * 1000)) {
+						if (match && (!times[r.id] || (now - times[r.id] > config.wheneverRefactorySeconds * 1000))) {
 							callback(r);
 							if (r.time) when.deleteByID(r.id);
 							else times[r.id] = now;
@@ -133,7 +134,7 @@ var when = module.exports = {
 						result.push(
 							((r.time && r.time > (new Date()).getTime()) ? "at " + utility.formatTime(r.time) + " " : "") +
 							((r.condition != null) ? "when" + (r.time ? " " : "ever ") + (r.user || "someone") +
-								" says " + (r.condition ? "\"" + r.condition + "\" " : "something ") : "") +
+								" says " + (r.condition ? "/" + r.condition + "/ " : "something ") : "") +
 							"then " + r.command
 						);
 					});
@@ -154,7 +155,7 @@ var when = module.exports = {
 					post([
 						"Conditional commands. Full semantics are as follows:",
 						"\t[at {time} | in {duration}]",
-						"\t[when[ever] ({user} | someone) says (\"{string}\" | something)]",
+						"\t[when[ever] ({user} | someone) says (/{pattern}/ | something)]",
 						"\t[then] ([do] ({command} | nothing) | say {message})",
 						"'when list' lists all the current when rules",
 						"'whenever' rules have a " + 
