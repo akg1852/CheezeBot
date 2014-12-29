@@ -108,9 +108,10 @@ var when = module.exports = {
 				if (error) console.error("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(function(r) {
-						var match = !(r.condition && !context.content.match(new RegExp(r.condition, "i")));
+						var match = (!r.condition || context.content.match(new RegExp(r.condition, "i")));
 						var now = (new Date()).getTime();
 						if (match && (!times[r.id] || (now - times[r.id] > config.wheneverRefactorySeconds * 1000))) {
+							context.whenTriggered = match;
 							callback(r);
 							if (r.time) when.deleteByID(r.id);
 							else times[r.id] = now;
