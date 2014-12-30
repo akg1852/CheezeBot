@@ -14,23 +14,20 @@ module.exports = {
 	reply: function(match, context, callback) {
 		dbConnect(function(db) {
 			db.run("CREATE TABLE IF NOT EXISTS js" +
-				"(name TEXT, params TEXT, code TEXT, PRIMARY KEY (name))", function(error) {
+				"(name TEXT, params TEXT, code TEXT, deleted INTEGER)", function(error) {
 				if (error) {
 					console.error("Error creating js table in database: " + JSON.stringify(error));
 				}
 				else if (match[2]) { // delete function
 					var name = match[2];
-					db.run("DELETE FROM js WHERE name = ?", name, function(error) {
-						if (error) {
-							console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
-						}
-						else if (this.changes) post("Deleted js function '" + name + "'.", context, callback);
+					deleteFunction(name, function() {
+						if (this.changes) post("Deleted js function '" + name + "'.", context, callback);
 						else post("No js function '" + name + "', nothing deleted.", context, callback);
 					});
 				}
 				else if (match[1]) {
 					if (match[1] == "list") { // list functions
-						db.all("SELECT * FROM js", function(error, rows) {
+						db.all("SELECT * FROM js WHERE deleted = 0", function(error, rows) {
 							if (error) {
 								console.error("Error retrieving js functions from db: " + JSON.stringify(error));
 							}
@@ -70,17 +67,19 @@ module.exports = {
 					var name = match[3];
 					var params = match[4];
 					var code = match[5];
-					db.run("INSERT OR REPLACE INTO js VALUES (?, ?, ?)", name, params, code, function(error) {
-						if (error) {
-							console.error("Error updating js table: " + JSON.stringify(error));
-						}
-						else post("Thanks for the new function.", context, callback);
+					deleteFunction(name, function() {
+						db.run("INSERT INTO js VALUES (?, ?, ?, 0)", name, params, code, function(error) {
+							if (error) {
+								console.error("Error updating js table: " + JSON.stringify(error));
+							}
+							else post("Thanks for the new function.", context, callback);
+						});
 					});
 				}
 				else { // call function
 					var name = match[3];
 					var args = match[4];
-					db.get("SELECT * FROM js WHERE name = ?", name, function(error, row) {
+					db.get("SELECT * FROM js WHERE deleted = 0 AND name = ?", name, function(error, row) {
 						if (error) {
 							console.error("Error reading js table: " + JSON.stringify(error));
 						}
@@ -120,3 +119,12 @@ module.exports = {
 		});
 	}
 };
+
+function deleteFunction(name, callback) {
+	db.run("UPDATE js SET deleted = 1 WHERE deleted = 0 AND name = ?", name, function(error) {
+		if (error) {
+			console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
+		}
+		else callback();
+	});
+}
