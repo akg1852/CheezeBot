@@ -15,6 +15,16 @@ module.exports = {
 		dbConnect(function(db) {
 			db.run("CREATE TABLE IF NOT EXISTS js" +
 				"(name TEXT, params TEXT, code TEXT, deleted INTEGER)", function(error) {
+				
+				function deleteFunction(name, callback) {
+					db.run("UPDATE js SET deleted = 1 WHERE deleted = 0 AND name = ?", name, function(error) {
+						if (error) {
+							console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
+						}
+						else callback.call(this);
+					});
+				}
+				
 				if (error) {
 					console.error("Error creating js table in database: " + JSON.stringify(error));
 				}
@@ -89,7 +99,7 @@ module.exports = {
 								", command = function(s) { print(\"" + commandFlag + "\" + s); }; (function(" +
 								row.params + "){" + row.code + "})(" + args + ")",
 								function(output) {
-									var l = output.console.length, i = 0;;
+									var l = output.console.length, i = 0;
 									if (l) {
 										var jsOut = function() {
 											if (i < l) {
@@ -119,12 +129,3 @@ module.exports = {
 		});
 	}
 };
-
-function deleteFunction(name, callback) {
-	db.run("UPDATE js SET deleted = 1 WHERE deleted = 0 AND name = ?", name, function(error) {
-		if (error) {
-			console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
-		}
-		else callback();
-	});
-}
