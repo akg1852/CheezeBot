@@ -8,7 +8,7 @@ var sandbox = new (require("sandbox"))();
 var shortcircuit = false;
 
 module.exports = {
-	description: "js {name}({params}) [\\n {code}]: create/run custom js code\n\t\t\t\t\t(see: 'js help')",
+	description: "js {name}({params}) [\\n {code}]:\tcreate/run custom js code (see: 'js help')",
 	pattern: /^js(?:\s+(?:(help)|(list)|(shortcircuit)|(delete)))?(?:[^\S\n\t]+([A-Z_$][0-9A-Z_$]*))?(?:[^\S\n\r]*\(([^\n\r]*)\))?(?:[\n\r]+([\s\S]+))?$/i,
 	priority: -10,
 	reply: function(match, context, callback) {
@@ -32,23 +32,23 @@ module.exports = {
 				else if (match[1]) { // help
 					post(["User-defined javascript functions!\n",
 						"Run some code:",
-						"\tjs \\n {code}",
+						"```\njs \\n {code}\n```",
 						"Define a function:",
-						"\tjs {name}({param, param, ...}) \\n {code}",
+						"```\njs {name}({param, param, ...}) \\n {code}\n```",
 						"Call a function:",
-						"\tjs {name}({arg, arg, ...})",
+						"```\njs {name}({arg, arg, ...})\n```",
 						"Delete a function:",
-						"\tjs delete {name}",
+						"```\njs delete {name}\n```",
 						"List all functions:",
-						"\tjs list",
+						"```\njs list\n```",
 						"Print a function's code:",
-						"\tjs {name}",
+						"```\njs {name}\n```",
 						"Stop a spammy function in it's tracks:",
-						"\tjs shortcircuit",
+						"```\njs shortcircuit\n```",
 						"Inside the {code} block of a function definition, access is provided to the following:",
-						"\tfunction post(\"{message text}\") {\n\t\t/* post a message */\n\t}",
-						"\tfunction command(\"{command text}\") {\n\t\t/* call a " + config.botName + " command */\n\t}",
-						"\tvar context = {\n\t\t/* the flowdock context of the function call */\n\t};",
+						"```\nfunction post(\"{message text}\") {\n\t/* post a message */\n}\n",
+						"function command(\"{command text}\") {\n\t/* call a " + config.botName + " command */\n}\n",
+						"var context = {\n\t\t/* the flowdock context of the function call */\n}\n```",
 					].join("\n"), context, callback);
 				}
 				if (match[2]) { // list functions
@@ -61,7 +61,7 @@ module.exports = {
 							rows.forEach(function(r) {
 								result.push(r.name + "(" + r.params + ")");
 							});
-							post(result.join("\n\t"), context, callback);
+							post(result.join("\n* "), context, callback);
 						}
 						else post("No js functions to display.", context, callback);
 					});
@@ -95,7 +95,7 @@ module.exports = {
 						}
 						else if (row) {
 							if (typeof params == "string") callFunction(row.params, params, row.code, context, callback); // call
-							else post("Definition for js function " + name + "(" + row.params + ")\n" + row.code, context, callback); // print
+							else post("Definition for js function " + name + "(" + row.params + ")\n```\n" + row.code + "\n```", context, callback); // print
 						}
 						else post("There is no js function '" + name + "'.", context, callback);
 					});

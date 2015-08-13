@@ -2,7 +2,7 @@ var post = require("../flowdock.js").post;
 var request = require('request');
 
 module.exports = {
-	description: "gif {search string}:\t\tshow a gif based on a search string",
+	description: "gif {search string}:\t\t\t\tshow a gif based on a search string",
 	pattern: /^gif\s+(.+)/i,
 	priority: 10,
 	reply: function(match, context, callback) {

@@ -2,7 +2,7 @@ var dbConnect = require("../utility.js").dbConnect;
 var post = require("../flowdock.js").post;
 
 module.exports = {
-	description: "tally {category} [{member}[++|--]]: keep a tally (see: 'tally help')",
+	description: "tally {category} [{member}[++|--]]:\tkeep a tally (see: 'tally help')",
 	pattern: /^tally\s+(pivot\s+)?(?:(help)|(list)|(?:(\S+)(?:\s+([^\s+-]*)\s*(\+\+|--|\+=\s*\d+|-=\s*\d+)?)?))\s*/i,
 	reply: function(m, context, callback) {
 		match = { pivot: !!m[1], help: !!m[2], list: !!m[3], command: m[6] };
@@ -16,7 +16,7 @@ module.exports = {
 				if (error) console.error("Error creating tally table in database: " + JSON.stringify(error));
 				else if (match.help) {
 					post(["Tally command:",
-						"\ttally {category} [{member} [++|--|+= n|-= n]]",
+						"`tally {category} [{member} [++|--|+= n|-= n]]`",
 						"'tally list' lists all categories",
 						"'tally pivot ...' swaps categories and members",
 					].join("\n"),
@@ -27,7 +27,7 @@ module.exports = {
 					db.all("SELECT " + match.item + " FROM tally GROUP BY " + match.item, function(error, rows) {
 						if (error) console.error("Error reading tally list: " + JSON.stringify(error));
 						else if (rows.length) {
-							var result = "Tally " + match.item + " list:\n\t" + rows.map(function(r) { return r[match.item] }).join("\n\t");
+							var result = ["Tally " + match.item + " list:"].concat(rows.map(function(r) { return r[match.item] })).join("\n* ");
 							post(result, context, callback);
 						}
 						else post("No " + match.item + " to list.", context, callback);
@@ -38,7 +38,7 @@ module.exports = {
 						var postTally = function(rows) {
 							var result = "";
 							for (var i = 0; i < rows.length; i++) {
-								result += "\n\t" + (match.pivot ? rows[i].category : rows[i].member) + ": " + rows[i].count;
+								result += "\n* " + (match.pivot ? rows[i].category : rows[i].member) + ": " + rows[i].count;
 							}
 							post("Tally for " + match.item + " '" + match[match.item] + "':" + result, context, callback);
 						};

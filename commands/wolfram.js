@@ -4,7 +4,7 @@ var request = require('request');
 var xml2js = require('xml2js');
 
 module.exports = {
-	description: "wolfram {search string}:\tsearch wolfram alpha",
+	description: "wolfram {search string}:\t\t\tsearch wolfram alpha",
 	pattern: /^wolfram\s+(.+)/i,
 	reply: function(match, context, callback) {
 		request(encodeURI("http://api.wolframalpha.com/v2/query?appid=" + config.wolframAlphaToken + "&input=" + match[1]),
@@ -14,11 +14,9 @@ module.exports = {
 						if (result.queryresult.$.success == "true" && result.queryresult.pod) {
 							post([].concat.apply([], result.queryresult.pod.map(function(p) {
 								var podText = [].concat.apply([], p.subpod.map(function(sp) {
-									return sp.plaintext[0].split("\n").map(function(t) {
-										return t ? "    " + t : null;
-									});
+									return sp.plaintext[0].split("\n").map(function(t) { return t || null; });
 								})).filter(function(t) { return t != null; }).join("\n");
-								return podText ? p.$.title + ": \n" + podText : null;
+								return podText ? p.$.title + ": \n```\n" + podText + "\n```" : null;
 							})).filter(function(t) { return t != null; }).join("\n"), context, callback);
 						}
 						else post("No wolfram results found", context, callback);

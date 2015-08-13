@@ -4,7 +4,7 @@ var post = require("../flowdock.js").post;
 var request = require('request');
 
 module.exports = {
-		description: "weather {city}:\t\t\tweather forecast information",
+		description: "weather {city}:\t\t\t\t\t\tweather forecast information",
 		pattern: /^weather\s+(.+)/i,
 		reply: function(match, context, callback) {
 			request(encodeURI("http://autocomplete.wunderground.com/aq?query=" + match[1]), function(error, response, body) {
@@ -18,14 +18,15 @@ module.exports = {
 									var forecast = JSON.parse(body).forecast;
 									if (forecast) {
 										var forecastDays = forecast.simpleforecast.forecastday;
-										var result = "Weather forecast for " + cities[0].name + ":";
+										var result = "Weather forecast for " + cities[0].name + ":\n```";
 										for (var i = 0; i < 7; i++) {
 											var day = forecastDays[i];
-											result += "\n\t*  " + day.date.weekday + ":\t" +
+											result += "\n*  " + utility.pad(15, day.date.weekday + ":") +
 												utility.pad(20, day.conditions).substr(0, 20) + "| " +
 												day.high.celsius + "/" + day.low.celsius + "°C\t| " +
 												day.avewind.kph + "kph " + day.avewind.dir;
 										}
+                                        result += "\n```";
 										post(result, context, callback);
 									}
 									else post("No weather information found", context, callback);

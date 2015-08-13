@@ -5,10 +5,11 @@ module.exports = {
 	flowdockToken: "",
 	flows: [],
 	about: ["CheezeBot by Adam-G",
-		"Source: github.com/akg1852/CheezeBot/", "Suggestions or contributions welcome.",,
-		"API Credits:", "FLOWDOCK.com/api",
-		"WUNDERGROUND.com/weather/api", "developer.GITHUB.com/v3/", "github.com/GIPHY/giphyapi",
-		"developers.GOOGLE.com/youtube/v3/", "http://products.WOLFRAMALPHA.com/api/"].join("\n"),
+		"Suggestions or [contributions](github.com/akg1852/CheezeBot/) welcome.",,
+		"API Credits:",
+        "[Flowdock](flowdock.com/api)",
+		"[Weather Underground](wunderground.com/weather/api)", "[GitHub](developer.github.com/v3/)", "[Giphy](github.com/giphy/giphyapi)",
+		"[YouTube](developers.google.com/youtube/v3/)", "[Wolfram Alpha](http://products.wolframalpha.com/api/)"].join("\n"),
 	wheneverRefactorySeconds: 300,
 	
 	// COMMAND CONFIG:

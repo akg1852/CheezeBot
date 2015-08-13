@@ -139,7 +139,7 @@ var when = module.exports = {
 							"then " + r.command
 						);
 					});
-					post(result.join("\n\t"), context);
+					post(result.join("\n* "), context);
 				}
 				else post("No 'when' rules to display", context);
 			});
@@ -147,7 +147,7 @@ var when = module.exports = {
 	},
 	
 	help: {
-		description: "when {condition} do {command}:\tconditional command (see: 'when help')",
+		description: "when {condition} do {command}:\t\tconditional command (see: 'when help')",
 		pattern: /^when (help|list)/i,
 		reply: function(match, context, callback) {
 			switch (match[1]) {
@@ -155,9 +155,11 @@ var when = module.exports = {
 					var s = config.wheneverRefactorySeconds;
 					post([
 						"Conditional commands. Full semantics are as follows:",
-						"\t[at {time} | in {duration}]",
-						"\t[when[ever] ({user} | someone) says (/{pattern}/ | something)]",
-						"\t[then] ([do] ({command} | nothing) | say {message})",
+                        "```",
+						"[at {time} | in {duration}]",
+						"[when[ever] ({user} | someone) says (/{pattern}/ | something)]",
+						"[then] ([do] ({command} | nothing) | say {message})",
+                        "```",
 						"'when list' lists all the current when rules",
 						"'whenever' rules have a " + 
 							((s >= 60) ? (Number((s/60).toFixed(1)) + " minute") : (s + " second")) + " refactory period"

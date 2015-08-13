@@ -3,7 +3,7 @@ var post = require("../flowdock.js").post;
 var request = require('request');
 
 module.exports = {
-	description: "pullrequests {user}/{repo}:\tlist open pull requests",
+	description: "pullrequests {user}/{repo}:\t\t\tlist open pull requests",
 	pattern: /^pullrequests\s+(.+\/.+)/i,
 	reply: function(match, context, callback) {
 		var repo = match[1].trim();
@@ -21,7 +21,7 @@ module.exports = {
 					var result = "Pull requests for " + repo + ":";
 					for (var i = 0; i < prs.length; i++) {
 						var pr = prs[i];
-						result += "\n\t*  " + pr.title + ": " + pr.html_url;
+						result += "\n* [" + pr.title + "](" + pr.html_url + ")";
 					}
 					post(result, context, callback);
 				}

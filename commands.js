@@ -10,14 +10,15 @@ fs.readdir("commands", function(error, files) {
 		
 		// 'help' message
 		commands.push({
-			description: "help:\t\t\t\tdisplay this message",
+			description: "help:\t\t\t\t\t\t\t\tdisplay this message",
 			pattern: /^help/i,
 			reply: function(match, context, callback) {
-				var s = config.botName + " commands:";
+				var s = config.botName + " commands:\n```";
 				for (var i = 0; i < commands.length; i++) {
 					var command = commands[i];
-					if (command.description) s += "\n\t" + command.description;
+					if (command.description) s += "\n" + command.description;
 				}
+                s += "\n```";
 				post(s, context, callback);
 			}
 		});
@@ -37,7 +38,7 @@ fs.readdir("commands", function(error, files) {
 
 		// 'about' message
 		commands.push({
-			description: "about:\t\t\t\tabout " + config.botName,
+			description: "about:\t\t\t\t\t\t\t\tabout " + config.botName,
 			pattern: /^about/i,
 			reply: function(match, context, callback) {
 				post(config.about, context, callback);
