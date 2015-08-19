@@ -10,7 +10,7 @@ Once you have cloned the project, setup involves making some changes:
 	* the other credentials are for specific command functionality
 * Edit the contents of the `commands` directory to give the bot the functionality you require.
 	Each command requires:
-	* a `description` for the help listing
+	* a `synopsis` and `description` for the help listing
 	* a regex `pattern` to trigger the command
 	* a `priority` (optional, 0 by default), which is a number used for determining the order in which commands are attempted to be matched against user input, and also for determining the order the commands appear in the help listing.
 	* a `reply` method, which generates the bot's reply, and needs to call the `post` method (from `flowdock.js`). The `reply` method takes the following parameters:

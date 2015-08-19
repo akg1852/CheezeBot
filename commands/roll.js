@@ -1,7 +1,8 @@
 var post = require("../flowdock.js").post;
 
 module.exports = {
-	description: "roll {dice}d{sides}:\t\t\t\troll dice (eg roll 2d6)",
+	synopsis: "roll {dice}d{sides}",
+	description: "roll dice (eg roll 2d6)",
 	pattern: /^roll\s+(\d*)d(\d+)/i,
 	reply: function(match, context, callback) {
 		var dice = Number(match[1]) || 1;

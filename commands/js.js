@@ -8,7 +8,8 @@ var sandbox = new (require("sandbox"))();
 var shortcircuit = false;
 
 module.exports = {
-	description: "js {name}({params}) [\\n {code}]:\tcreate/run custom js code (see: 'js help')",
+	synopsis: "js {name}({params}) [\\n {code}]",
+	description: "create/run custom js code (see: 'js help')",
 	pattern: /^js(?:\s+(?:(help)|(list)|(shortcircuit)|(delete)))?(?:[^\S\n\t]+([A-Z_$][0-9A-Z_$]*))?(?:[^\S\n\r]*\(([^\n\r]*)\))?(?:[\n\r]+([\s\S]+))?$/i,
 	priority: -10,
 	reply: function(match, context, callback) {

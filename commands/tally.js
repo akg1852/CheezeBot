@@ -2,7 +2,8 @@ var dbConnect = require("../utility.js").dbConnect;
 var post = require("../flowdock.js").post;
 
 module.exports = {
-	description: "tally {category} [{member}[++|--]]:\tkeep a tally (see: 'tally help')",
+	synopsis: "tally {category} [{member}[++|--]]",
+	description: "keep a tally (see: 'tally help')",
 	pattern: /^tally\s+(pivot\s+)?(?:(help)|(list)|(?:(\S+)(?:\s+([^\s+-]*)\s*(\+\+|--|\+=\s*\d+|-=\s*\d+)?)?))\s*/i,
 	reply: function(m, context, callback) {
 		match = { pivot: !!m[1], help: !!m[2], list: !!m[3], command: m[6] };

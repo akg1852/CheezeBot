@@ -2,7 +2,8 @@ var dbConnect = require("../utility.js").dbConnect;
 var post = require("../flowdock.js").post;
 
 module.exports = {
-	description: "quote [\"{quote}\" - {quotee}]:\t\tquote store",
+	synopsis: "quote [\"{quote}\" - {quotee}]",
+	description: "quote store",
 	pattern: /^quote(?:\s+(.+))?/i,
 	reply: function(match, context, callback) {
 		dbConnect(function(db) {

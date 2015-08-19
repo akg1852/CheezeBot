@@ -3,7 +3,8 @@ var post = require("../flowdock.js").post;
 var request = require('request');
 
 module.exports = {
-	description: "pullrequests {user}/{repo}:\t\t\tlist open pull requests",
+	synopsis: "pullrequests {user}/{repo}",
+	description: "list open pull requests",
 	pattern: /^pullrequests\s+(.+\/.+)/i,
 	reply: function(match, context, callback) {
 		var repo = match[1].trim();

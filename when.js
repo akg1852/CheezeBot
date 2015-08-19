@@ -147,7 +147,8 @@ var when = module.exports = {
 	},
 	
 	help: {
-		description: "when {condition} do {command}:\t\tconditional command (see: 'when help')",
+		synopsis: "when {condition} do {command}",
+		description: "conditional command (see: 'when help')",
 		pattern: /^when (help|list)/i,
 		reply: function(match, context, callback) {
 			switch (match[1]) {

@@ -3,7 +3,8 @@ var post = require("../flowdock.js").post;
 var request = require('request');
 
 module.exports = {
-	description: "video {search string}:\t\t\t\tshow a video based on a search string",
+	synopsis: "video {search string}",
+	description: "show a video based on a search string",
 	pattern: /^(?:video|youtube)\s+(.+)/i,
 	reply: function(match, context, callback) {
 		request(encodeURI("https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&key=" +

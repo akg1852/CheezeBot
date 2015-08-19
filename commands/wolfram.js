@@ -4,7 +4,8 @@ var request = require('request');
 var xml2js = require('xml2js');
 
 module.exports = {
-	description: "wolfram {search string}:\t\t\tsearch wolfram alpha",
+	synopsis: "wolfram {search string}",
+	description: "search wolfram alpha",
 	pattern: /^wolfram\s+(.+)/i,
 	reply: function(match, context, callback) {
 		request(encodeURI("http://api.wolframalpha.com/v2/query?appid=" + config.wolframAlphaToken + "&input=" + match[1]),

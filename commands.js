@@ -1,6 +1,7 @@
 var config = require("./config.js");
 var post = require("./flowdock.js").post;
 var when = require("./when.js");
+var pad = require("./utility.js").pad;
 var fs = require('fs');
 
 var commands = module.exports = [];
@@ -10,13 +11,15 @@ fs.readdir("commands", function(error, files) {
 		
 		// 'help' message
 		commands.push({
-			description: "help:\t\t\t\t\t\t\t\tdisplay this message",
+			synopsis: "help",
+			description: "display this message",
 			pattern: /^help/i,
 			reply: function(match, context, callback) {
+				var synopsisWidth = Math.max.apply(Math, commands.map(function(c) { return (c.synopsis || "").length; }));
 				var s = config.botName + " commands:\n```";
 				for (var i = 0; i < commands.length; i++) {
 					var command = commands[i];
-					if (command.description) s += "\n" + command.description;
+					if (command.synopsis && command.description) s += "\n" + pad(synopsisWidth + 2, command.synopsis) + command.description;
 				}
                 s += "\n```";
 				post(s, context, callback);
@@ -38,7 +41,8 @@ fs.readdir("commands", function(error, files) {
 
 		// 'about' message
 		commands.push({
-			description: "about:\t\t\t\t\t\t\t\tabout " + config.botName,
+			synopsis: "about",
+			description: "about " + config.botName,
 			pattern: /^about/i,
 			reply: function(match, context, callback) {
 				post(config.about, context, callback);
@@ -47,7 +51,6 @@ fs.readdir("commands", function(error, files) {
 		
 		// 'say' command
 		commands.push({
-			description: null,
 			pattern: /^(?:say|echo)\s+([\s\S]+)/i,
 			reply: function(match, context, callback) {
 				post(match[1], context, callback);

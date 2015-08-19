@@ -4,7 +4,8 @@ var post = require("../flowdock.js").post;
 var request = require('request');
 
 module.exports = {
-		description: "weather {city}:\t\t\t\t\t\tweather forecast information",
+		synopsis: "weather {city}",
+		description: "weather forecast information",
 		pattern: /^weather\s+(.+)/i,
 		reply: function(match, context, callback) {
 			request(encodeURI("http://autocomplete.wunderground.com/aq?query=" + match[1]), function(error, response, body) {
