@@ -20,5 +20,5 @@ Once you have cloned the project, setup involves making some changes:
 
 Now you're ready to run the bot:
 
-* `npm install` the required packages
-* run the bot by typing `node index.js` from the terminal
+* run `npm install` to install the required packages
+* run `node index.js` to start the bot
