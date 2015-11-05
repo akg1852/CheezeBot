@@ -71,13 +71,18 @@ var flowdock = module.exports = {
 	// post a message
 	post: function(reply, context, callback) {
 		var options = {
-			url: encodeURI("https://api.flowdock.com/v1/messages/chat/" + context.flow.token),
+			url: encodeURI("https://" + config.flowdockToken + ":DUMMY@api.flowdock.com/flows/" + context.flow.name +
+				(context.thread === undefined ? "/messages" : ("/threads/" + context.thread.id + "/messages"))),
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ "content": String(reply) || "[no reply]", "external_user_name": config.botName })
+			body: JSON.stringify({
+				"event": "message",
+				"content": String(reply) || "[no reply]",
+				"external_user_name": config.botName
+			})
 		};
 		request(options, function(error, response, body) {
-			if (!error && response.statusCode == 200) {
+			if (!error && (response.statusCode == 200 || response.statusCode == 201)) {
 				console.log("\n---" + context.flow.name + "--- (" + now() + ")\n" + context.user.nick + ": " + context.content);
 				console.log(config.botName + ": " + reply + "\n");
 				if (callback) callback();

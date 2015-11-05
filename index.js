@@ -51,6 +51,7 @@ function run() {
 											commands.execute(query.command, {
 												flow: context.flow,
 												user: context.user,
+												thread: context.thread,
 												content: "<time delay rule triggered>" });
 											when.deleteByID(id);
 										}, query.time - now);
