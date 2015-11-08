@@ -1,9 +1,22 @@
+var cluster = require('cluster');
 var commands = require("./commands.js");
 var when = require("./when.js");
 var flowdock = require("./flowdock.js");
 
 var stream = {};
 var loadedDelayed = false;
+
+if (cluster.isMaster) {
+	cluster.fork();
+	cluster.on('exit', function(worker, code, signal) {
+		console.log("restarting app");
+		setTimeout(cluster.fork, 2000);
+	});
+}
+
+if (cluster.isWorker) {
+	run();
+}
 
 function run() {
 	
@@ -84,4 +97,3 @@ function run() {
 		setTimeout(run, 2000);
 	});
 };
-run();
