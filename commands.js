@@ -53,7 +53,9 @@ fs.readdir("commands", function(error, files) {
 		commands.push({
 			pattern: /^(?:say|echo)\s+([\s\S]+)/i,
 			reply: function(match, context, callback) {
-				post(match[1], context, callback);
+				var s = match[1].split(/["“”]/i);
+				s = (s.length == 3 && !s[0] && !s[2]) ? s[1] : match[1];
+				post(s, context, callback);
 			}
 		});
 	}
