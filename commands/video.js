@@ -12,7 +12,10 @@ module.exports = {
 			function(error, response, body) {
 				if (!error && response.statusCode == 200) {
 					var videoData = JSON.parse(body).items[0];
-					if (videoData) post("http://www.youtube.com/watch?v=" + videoData.id.videoId, context, callback);
+					if (videoData) {
+						post("[" + videoData.snippet.title + "](http://www.youtube.com/watch?v=" + videoData.id.videoId + ")\n" +
+							videoData.snippet.thumbnails.medium.url, context, callback);
+					}
 					else post("No suitable video found - try a different search", context, callback);
 				}
 				else {
