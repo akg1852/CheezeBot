@@ -14,7 +14,7 @@ var when = module.exports = {
 			"(?:in\\s+([\\d.]+\\s*(?:second(?:s?)|minute(?:s?)|hour(?:s?)|day(?:s?)))\\s+))?" + // 2: duration
 			"(?:when(ever)?\\s+" + // 3: repeating
 			"(\\S+)\\s+says\\s+" + // 4: user
-			"(?:something|[\"/]([^/]+)[\"/])\\s+)?" + // 5: condition
+			"(?:something|[\"/]((?:[^/\\\\]|\\\\.)+)[\"/])\\s+)?" + // 5: condition
 			"(?:then\\s+)?(?:do\\s+)?" +
 			"([\\s\\S]+)"; // 6: command
 		var match = query.match(new RegExp("^\\s*" + config.botName + "\\s+" + pattern, "i"));
