@@ -10,7 +10,7 @@ module.exports = {
 		"[Flowdock](flowdock.com/api)",
 		"[Weather Underground](wunderground.com/weather/api)", "[GitHub](developer.github.com/v3/)", "[Giphy](github.com/giphy/giphyapi)",
 		"[YouTube](developers.google.com/youtube/v3/)", "[Wolfram Alpha](http://products.wolframalpha.com/api/)"].join("\n"),
-	wheneverRefactorySeconds: 300,
+	wheneverRefractorySeconds: 5,
 	
 	// COMMAND CONFIG:
 	githubToken: "",

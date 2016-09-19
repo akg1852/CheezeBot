@@ -110,11 +110,16 @@ var when = module.exports = {
 					rows.forEach(function(r) {
 						var match = (!r.condition || context.content.match(new RegExp(r.condition, "i")));
 						var now = (new Date()).getTime();
-						if (match && (!times[r.id] || (now - times[r.id] > config.wheneverRefactorySeconds * 1000))) {
-							context.whenTriggered = match;
-							callback(r);
-							if (r.time) when.deleteByID(r.id);
-							else times[r.id] = now;
+						if (match) {
+							if (times[r.id] && (now - times[r.id] <= config.wheneverRefractorySeconds * 1000)) {
+								console.log("'when' rule " + r.id + " not run due to refractory period");
+							}
+							else {
+								context.whenTriggered = match;
+								callback(r);
+								if (r.time) when.deleteByID(r.id);
+								else times[r.id] = now;
+							}
 						}
 					});
 				}
@@ -153,7 +158,7 @@ var when = module.exports = {
 		reply: function(match, context, callback) {
 			switch (match[1]) {
 				case "help":
-					var s = config.wheneverRefactorySeconds;
+					var s = config.wheneverRefractorySeconds;
 					post([
 						"Conditional commands. Full semantics are as follows:",
                         "```",
@@ -163,7 +168,7 @@ var when = module.exports = {
                         "```",
 						"'when list' lists all the current when rules",
 						"'whenever' rules have a " + 
-							((s >= 60) ? (Number((s/60).toFixed(1)) + " minute") : (s + " second")) + " refactory period"
+							((s >= 60) ? (Number((s/60).toFixed(1)) + " minute") : (s + " second")) + " refractory period"
 					].join("\n"), context, callback);
 					break;
 				case "list":
