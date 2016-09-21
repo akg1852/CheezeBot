@@ -42,6 +42,13 @@ var when = module.exports = {
 	},
 	
 	add: function(query, context, callback) {
+		try {
+			new RegExp(query.condition, "i");
+		}
+		catch(e) {
+			post("Bad regex: /" + query.condition + "/", context);
+			return;
+		}
 		dbConnect(function(db) {
 			db.run("INSERT INTO 'when' VALUES (?, ?, ?, ?, ?, ?)",
 				null, context.flow.id, query.time, query.user, query.condition, query.command, function(error) {
@@ -161,11 +168,11 @@ var when = module.exports = {
 					var s = config.wheneverRefractorySeconds;
 					post([
 						"Conditional commands. Full semantics are as follows:",
-                        "```",
+						"```",
 						"[at {time} | in {duration}]",
 						"[when[ever] ({user} | someone) says (/{pattern}/ | something)]",
 						"[then] ([do] ({command} | nothing) | say {message})",
-                        "```",
+						"```",
 						"'when list' lists all the current when rules",
 						"'whenever' rules have a " + 
 							((s >= 60) ? (Number((s/60).toFixed(1)) + " minute") : (s + " second")) + " refractory period"
