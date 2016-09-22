@@ -48,6 +48,8 @@ function run() {
 			if (context.event == "message" && typeof context.content == "string") {
 				flowdock.setMetaData(context, function(context) {
 					var query = when.matchQuery(context.content);
+					var isPing = false;
+					
 					if (query) {
 						if (query.command) {
 							if (query.condition != null){
@@ -56,7 +58,9 @@ function run() {
 							else if (query.time) {
 								var now = (new Date()).getTime();
 								if (query.time <= now) {
-									commands.execute(query.command, context);
+									if (!commands.execute(query.command, context)) {
+										isPing = true;
+									}
 								}
 								else {
 									when.add(query, context, function(id) {
@@ -74,9 +78,15 @@ function run() {
 						}
 						else when.deleteByQuery(query, context);
 					}
-					else when.trigger(context, function(r) {
-						commands.execute(r.command, context);
-					});
+					
+					if (!query || isPing) {
+						when.trigger(context,
+							function(r) { commands.execute(r.command, context); },
+							isPing ?
+								function() { flowdock.post("Are you trying to talk to me?", context); } :
+								null
+						);
+					}
 				});
 			}
 		});

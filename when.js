@@ -17,7 +17,7 @@ var when = module.exports = {
 			"(?:something|[\"/]((?:[^/\\\\]|\\\\.)+)[\"/])\\s+)?" + // 5: condition
 			"(?:then\\s+)?(?:do\\s+)?" +
 			"([\\s\\S]+)"; // 6: command
-		var match = query.match(new RegExp("^\\s*" + config.botName + "\\s+" + pattern, "i"));
+		var match = query.match(new RegExp("^\\s*" + config.botName + "\\W+" + pattern, "i"));
 		if (match) return {
 			user: (match[4] == "someone") ? undefined : match[4],
 			time: match[3] ? undefined
@@ -106,9 +106,12 @@ var when = module.exports = {
 		})
 	},
 	
-	trigger: function(context, callback) {
+	trigger: function(context, callback, nullCallback) {
+		if (context.content.match(new RegExp(when.noTrigger, "i"))) {
+			if (nullCallback) nullCallback();
+			return;
+		}
 		dbConnect(function(db) {
-			if (context.content.match(new RegExp(when.noTrigger, "i"))) return;
 			db.all("SELECT * FROM 'when' WHERE " +
 				"flow = ? AND (time IS NULL OR time <= ?) AND (user IS NULL OR user LIKE ?)",
 				context.flow.id, (new Date()).getTime(), context.user.nick, function(error, rows) {
@@ -130,6 +133,7 @@ var when = module.exports = {
 						}
 					});
 				}
+				else if (nullCallback) nullCallback();
 			});
 		});
 	},

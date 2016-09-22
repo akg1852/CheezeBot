@@ -21,7 +21,7 @@ fs.readdir("commands", function(error, files) {
 					var command = commands[i];
 					if (command.synopsis && command.description) s += "\n" + pad(synopsisWidth + 2, command.synopsis) + command.description;
 				}
-                s += "\n```";
+				s += "\n```";
 				post(s, context, callback);
 			}
 		});
@@ -68,7 +68,8 @@ commands.execute = function(command, context, callback) {
 		var match = command.match(c.pattern);
 		if (match) {
 			c.reply(match, context, callback);
-			break;
+			return true;
 		}
 	}
+	return false;
 };
