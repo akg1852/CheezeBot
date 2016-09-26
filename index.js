@@ -1,4 +1,5 @@
 var cluster = require('cluster');
+var config = require("./config.js");
 var commands = require("./commands.js");
 var when = require("./when.js");
 var flowdock = require("./flowdock.js");
@@ -82,7 +83,7 @@ function run() {
 					if (!query || isPing) {
 						when.trigger(context,
 							function(r) { commands.execute(r.command, context); },
-							isPing ?
+							isPing && (context.external_user_name != config.botName) ?
 								function() { flowdock.post("Are you trying to talk to me?", context); } :
 								null
 						);
