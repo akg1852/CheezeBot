@@ -39,7 +39,7 @@ module.exports = {
 					}
 					addPRs();
 				}
-				else post("no open pull requests for " + repo, context, callback);
+				else post("no open pull requests for " + repo + (branch ? " (" + branch + ")" : ""), context, callback);
 			}
 			else {
 				console.error("Error requesting github data: " + JSON.stringify(error || response) + "\n");
