@@ -115,6 +115,7 @@ var when = module.exports = {
 			db.all("SELECT * FROM 'when' WHERE " +
 				"flow = ? AND (time IS NULL OR time <= ?) AND (user IS NULL OR user LIKE ?)",
 				context.flow.id, (new Date()).getTime(), context.user.nick, function(error, rows) {
+				var triggered = 0;
 				if (error) console.error("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(function(r) {
@@ -125,6 +126,7 @@ var when = module.exports = {
 								console.log("'when' rule " + r.id + " not run due to refractory period");
 							}
 							else {
+								triggered++;
 								context.whenTriggered = match;
 								callback(r);
 								if (r.time) when.deleteByID(r.id);
@@ -133,7 +135,7 @@ var when = module.exports = {
 						}
 					});
 				}
-				else if (nullCallback) nullCallback();
+				if (!triggered && nullCallback) nullCallback();
 			});
 		});
 	},
