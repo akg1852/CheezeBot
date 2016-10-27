@@ -46,7 +46,7 @@ function run() {
 		
 		// listen for messages
 		stream.on('data', function(context) {
-			if (context.event == "message" && typeof context.content == "string") {
+			if (context.event == "message" && typeof context.content == "string" && context.external_user_name != config.botName) {
 				flowdock.setMetaData(context, function(context) {
 					var query = when.matchQuery(context.content);
 					var isPing = false;
@@ -83,7 +83,7 @@ function run() {
 					if (!query || isPing) {
 						when.trigger(context,
 							function(r) { commands.execute(r.command, context); },
-							isPing && (context.external_user_name != config.botName) ?
+							isPing ?
 								function() { flowdock.post("Are you trying to talk to me?", context); } :
 								null
 						);

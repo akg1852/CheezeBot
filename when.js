@@ -107,10 +107,6 @@ var when = module.exports = {
 	},
 	
 	trigger: function(context, callback, nullCallback) {
-		if (context.content.match(new RegExp(when.noTrigger, "i"))) {
-			if (nullCallback) nullCallback();
-			return;
-		}
 		dbConnect(function(db) {
 			db.all("SELECT * FROM 'when' WHERE " +
 				"flow = ? AND (time IS NULL OR time <= ?) AND (user IS NULL OR user LIKE ?)",
@@ -139,7 +135,6 @@ var when = module.exports = {
 			});
 		});
 	},
-	noTrigger: String.fromCharCode(8203),
 	
 	list: function(context) {
 		dbConnect(function(db) {
@@ -148,7 +143,7 @@ var when = module.exports = {
 				context.flow.id, (new Date()).getTime(), day, function(error, rows) {
 				if (error) console.error("Error retrieving 'when' rules for list: " + JSON.stringify(error));
 				else if (rows.length) {
-					var result = ["List of all today's 'when' rules in the flow:" + when.noTrigger];
+					var result = ["List of all today's 'when' rules in the flow:"];
 					rows.forEach(function(r) {
 						result.push(
 							((r.time && r.time > (new Date()).getTime()) ? "at " + utility.formatTime(r.time) + " " : "") +

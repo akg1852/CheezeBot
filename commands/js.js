@@ -1,7 +1,6 @@
 var config = require("../config.js");
 var post = require("../flowdock.js").post;
 var dbConnect = require("../utility.js").dbConnect;
-var when = require("../when.js");
 var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
 
@@ -58,7 +57,7 @@ module.exports = {
 							console.error("Error retrieving js functions from db: " + JSON.stringify(error));
 						}
 						else if (rows.length) {
-							var result = ["List of all user-defined js functions:" + when.noTrigger];
+							var result = ["List of all user-defined js functions:"];
 							rows.forEach(function(r) {
 								result.push(r.name + "(" + r.params + ")");
 							});
