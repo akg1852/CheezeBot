@@ -28,6 +28,9 @@ fs.readdir("commands", function(error, files) {
 		
 		// add commands from 'commands' folder to 'commands' array
 		commands = commands.concat(files
+			.filter(function(f) {
+				return f.endsWith(".js");
+			})
 			.map(function(f) {
 				return require("./commands/" + f);
 			})
