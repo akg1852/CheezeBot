@@ -1,4 +1,4 @@
-var post = require("../flowdock.js").post;
+var post = require("../slack.js").post;
 
 module.exports = {
 	synopsis: "roll {dice}d{sides}",

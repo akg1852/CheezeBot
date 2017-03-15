@@ -1,6 +1,6 @@
 var config = require("../config.js");
 var utility = require("../utility.js");
-var post = require("../flowdock.js").post;
+var post = require("../slack.js").post;
 var request = require('request');
 
 module.exports = {

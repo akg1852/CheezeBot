@@ -1,5 +1,5 @@
 var config = require("../config.js");
-var post = require("../flowdock.js").post;
+var post = require("../slack.js").post;
 var request = require('request');
 var xml2js = require('xml2js');
 

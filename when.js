@@ -1,8 +1,7 @@
 var config = require("./config.js");
 var utility = require("./utility.js");
 var dbConnect = utility.dbConnect;
-var flowdock = require("./flowdock.js");
-var post = flowdock.post;
+var post = require("./slack.js").post;
 
 var loadedDelayed = false;
 var times = {};
@@ -143,7 +142,7 @@ var when = module.exports = {
 				context.flow.id, (new Date()).getTime(), day, function(error, rows) {
 				if (error) console.error("Error retrieving 'when' rules for list: " + JSON.stringify(error));
 				else if (rows.length) {
-					var result = ["List of all today's 'when' rules in the flow:"];
+					var result = ["List of all today's 'when' rules in the current channel:"];
 					rows.forEach(function(r) {
 						result.push(
 							((r.time && r.time > (new Date()).getTime()) ? "at " + utility.formatTime(r.time) + " " : "") +

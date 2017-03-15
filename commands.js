@@ -1,5 +1,5 @@
 var config = require("./config.js");
-var post = require("./flowdock.js").post;
+var post = require("./slack.js").post;
 var when = require("./when.js");
 var pad = require("./utility.js").pad;
 var fs = require('fs');

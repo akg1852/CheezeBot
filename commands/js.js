@@ -1,5 +1,5 @@
 var config = require("../config.js");
-var post = require("../flowdock.js").post;
+var post = require("../slack.js").post;
 var dbConnect = require("../utility.js").dbConnect;
 var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
@@ -48,7 +48,7 @@ module.exports = {
 						"Inside the {code} block of a function definition, access is provided to the following:",
 						"```\nfunction post(\"{message text}\") {\n\t/* post a message */\n}\n",
 						"function command(\"{command text}\") {\n\t/* call a " + config.botName + " command */\n}\n",
-						"var context = {\n\t\t/* the flowdock context of the function call */\n}\n```",
+						"var context = {\n\t\t/* the slack context of the function call */\n}\n```",
 					].join("\n"), context, callback);
 				}
 				if (match[2]) { // list functions

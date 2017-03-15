@@ -1,4 +1,3 @@
-var flowdock = require("../flowdock.js");
 var utility = require("../utility.js");
 
 module.exports = {
