@@ -1,7 +1,8 @@
 var config = require("./config.js");
 var utility = require("./utility.js");
 var dbConnect = utility.dbConnect;
-var post = require("./slack.js").post;
+var slack = require("./slack.js");
+var post = slack.post;
 
 var loadedDelayed = false;
 var times = {};
@@ -12,13 +13,13 @@ var when = module.exports = {
 		var pattern = "(?:(?:at\\s+(\\d\\d?:\\d\\d)\\s+)|" + // 1: time
 			"(?:in\\s+([\\d.]+\\s*(?:second(?:s?)|minute(?:s?)|hour(?:s?)|day(?:s?)))\\s+))?" + // 2: duration
 			"(?:when(ever)?\\s+" + // 3: repeating
-			"(\\S+)\\s+says\\s+" + // 4: user
+			"(.+)\\s+says\\s+" + // 4: user
 			"(?:something|[\"/]((?:[^/\\\\]|\\\\.)+)[\"/])\\s+)?" + // 5: condition
 			"(?:then\\s+)?(?:do\\s+)?" +
 			"([\\s\\S]+)"; // 6: command
 		var match = query.match(new RegExp("^\\s*" + config.botName + "\\W+" + pattern, "i"));
 		if (match) return {
-			user: (match[4] == "someone") ? undefined : match[4],
+			user: (match[4] == "someone") ? undefined : slack.findUser(match[4]),
 			time: match[3] ? undefined
 				: match[2] ? utility.parseDuration(match[2]).getTime()
 				: match[1] ? utility.parseTime(match[1]).getTime()
@@ -29,7 +30,7 @@ var when = module.exports = {
 	},
 	
 	createDB: function(callback) {
-		var whenColumns = "id INTEGER PRIMARY KEY, flow TEXT, time INTEGER, user TEXT, condition TEXT, command TEXT";
+		var whenColumns = "id INTEGER PRIMARY KEY, channel TEXT, time INTEGER, user TEXT, condition TEXT, command TEXT";
 		dbConnect(function(db) { db.run("CREATE TABLE IF NOT EXISTS 'when' (" + whenColumns + ")", function(error) {
 			if (error) {
 				console.error("Error creating 'when' table in database: " + JSON.stringify(error));
@@ -50,7 +51,7 @@ var when = module.exports = {
 		}
 		dbConnect(function(db) {
 			db.run("INSERT INTO 'when' VALUES (?, ?, ?, ?, ?, ?)",
-				null, context.flow.id, query.time, query.user, query.condition, query.command, function(error) {
+				null, context.channel, query.time, query.user, query.condition, query.command, function(error) {
 				if (error) console.error("Error adding 'when' rules: " + JSON.stringify(error));
 				else {
 					post("Thanks for the new 'when' rule!", context);
@@ -63,12 +64,12 @@ var when = module.exports = {
 	deleteByQuery: function(query, context) {
 		dbConnect(function(db) {
 			db.run("DELETE FROM 'when' WHERE " +
-				"flow = $flow AND " +
+				"channel = $channel AND " +
 				"((time IS NULL AND $time IS NULL) OR (time = $time) OR " +
 					"(condition IS NOT NULL AND time <= $currentTime AND $time <= $currentTime)) AND " +
 				"((condition IS NULL AND $condition IS NULL) OR condition LIKE $condition) AND " +
 				"((user IS NULL AND $user IS NULL) OR user LIKE $user)", {
-				$flow: context.flow.id, $time: query.time, $condition: query.condition,
+				$channel: context.channel, $time: query.time, $condition: query.condition,
 				$user: query.user, $currentTime: (new Date()).getTime() }, function(error) {
 					if (error) console.error("Error deleting 'when' rules: " + JSON.stringify(error));
 					else if (this.changes) {
@@ -108,13 +109,13 @@ var when = module.exports = {
 	trigger: function(context, callback, nullCallback) {
 		dbConnect(function(db) {
 			db.all("SELECT * FROM 'when' WHERE " +
-				"flow = ? AND (time IS NULL OR time <= ?) AND (user IS NULL OR user LIKE ?)",
-				context.flow.id, (new Date()).getTime(), context.user.nick, function(error, rows) {
+				"channel = ? AND (time IS NULL OR time <= ?) AND (user IS NULL OR user LIKE ?)",
+				context.channel, (new Date()).getTime(), context.user.id, function(error, rows) {
 				var triggered = 0;
 				if (error) console.error("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(function(r) {
-						var match = (!r.condition || context.content.match(new RegExp(r.condition, "i")));
+						var match = (!r.condition || context.text.match(new RegExp(r.condition, "i")));
 						var now = (new Date()).getTime();
 						if (match) {
 							if (times[r.id] && (now - times[r.id] <= config.wheneverRefractorySeconds * 1000)) {
@@ -138,8 +139,8 @@ var when = module.exports = {
 	list: function(context) {
 		dbConnect(function(db) {
 			var day = 24 * 60 * 60 * 1000;
-			db.all("SELECT * FROM 'when' where flow = ? AND (time IS NULL OR (time - ?) < ?)",
-				context.flow.id, (new Date()).getTime(), day, function(error, rows) {
+			db.all("SELECT * FROM 'when' where channel = ? AND (time IS NULL OR (time - ?) < ?)",
+				context.channel, (new Date()).getTime(), day, function(error, rows) {
 				if (error) console.error("Error retrieving 'when' rules for list: " + JSON.stringify(error));
 				else if (rows.length) {
 					var result = ["List of all today's 'when' rules in the current channel:"];

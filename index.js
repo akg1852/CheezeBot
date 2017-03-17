@@ -18,29 +18,29 @@ if (cluster.isWorker) {
 	
 	// create 'when' rule database
 	when.createDB(function() {
+
+		slack.connect(
 		
-/*
 		// get delayed commands
-		when.getDelayed(function(r) {
-			slack.setMetaData({ flow: r.flow, content: "<time delay rule triggered>" }, function(context) {
+		function() {
+			when.getDelayed(function(r) {
 				setTimeout(function() {
-					commands.execute(r.command, context);
+					commands.execute(r.command, {
+						channel: r.channel,
+						user: { id: 0, real_name: 'anon' },
+						text: '<time delay rule triggered>'
+					});
 					when.deleteByID(r.id);
 				}, r.time - (new Date()).getTime());
 			});
-		});
-*/
-		
+		},
 		// listen for messages
-		slack.connect(function(event) {
+		function(event) {
 			var context = JSON.parse(event.data);
+			if (context.user) context.user = slack.users[context.user];
+
 			if (context.type === 'message' && !context.hidden) {
-				
-				if (context.text && context.text.match(new RegExp("^\\s*" + config.botName + "\\W+", "i"))){
-					slack.post('hello', context);
-				}
-/*
-				var query = when.matchQuery(context.content);
+				var query = when.matchQuery(context.text);
 				var isPing = false;
 				
 				if (query) {
@@ -59,10 +59,12 @@ if (cluster.isWorker) {
 								when.add(query, context, function(id) {
 									setTimeout(function() {
 										commands.execute(query.command, {
-											flow: context.flow,
+											channel: context.channel,
 											user: context.user,
-											thread: context.thread,
-											content: "<time delay rule triggered>" });
+											ts: context.ts,
+											thread_ts: context.thread_ts,
+											text: '<time delay rule triggered>'
+											});
 										when.deleteByID(id);
 									}, query.time - now);
 								});
@@ -76,11 +78,10 @@ if (cluster.isWorker) {
 					when.trigger(context,
 						function(r) { commands.execute(r.command, context); },
 						isPing ?
-							function() { slack.post("Are you trying to talk to me?", context); } :
+							function() { slack.post('Are you trying to talk to me?', context); } :
 							null
 					);
 				}
-*/
 			}
 		});
 	});

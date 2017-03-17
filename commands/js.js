@@ -1,5 +1,6 @@
 var config = require("../config.js");
-var post = require("../slack.js").post;
+var slack = require("../slack.js");
+var post = slack.post;
 var dbConnect = require("../utility.js").dbConnect;
 var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
@@ -109,7 +110,7 @@ function callFunction(params, args, code, context, callback) {
 	var commandFlag = "<EXECUTE_BOT_COMMAND>";
 	sandbox.run("var post = print, context = " + JSON.stringify(context) +
 		", command = function(s) { print(\"" + commandFlag + "\" + s); }; (function(" +
-		params + "){" + code + "})(" + args + ")",
+		params + "){" + slack.decodeControlChars(code) + "})(" + args + ")",
 		function(output) {
 			var l = output.console.length, i = 0;
 			if (l) {

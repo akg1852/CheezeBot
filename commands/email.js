@@ -6,7 +6,7 @@ module.exports = {
 	pattern: /^email\s+(\S+@\S+)\s+([^\n\r]+)\s+([\s\S]+)/i,
 	reply: function(match, context, callback) {
 		utility.email({
-			from: context.user.name + " <" + context.user.email + ">",
+			from: context.user.real_name + " <" + context.user.profile.email + ">",
 			to: match[1],
 			subject: match[2],
 			text: match[3]
