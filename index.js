@@ -39,7 +39,7 @@ if (cluster.isWorker) {
 			var context = JSON.parse(event.data);
 			if (context.user) context.user = slack.users[context.user];
 
-			if (context.type === 'message' && !context.hidden) {
+			if (context.type === 'message' && !context.hidden && context.user && !context.user.is_bot) {
 				var query = when.matchQuery(context.text);
 				var isPing = false;
 				

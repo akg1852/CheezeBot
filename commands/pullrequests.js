@@ -14,7 +14,7 @@ module.exports = {
 			url: encodeURI(domain + "/repos/" + repo + "/pulls?access_token=" + config.githubToken + (branch ? "&base=" + branch : "")),
 			method: "GET",
 			rejectUnauthorized: false,
-			headers: { "User-Agent": config.BotName }
+			headers: { "User-Agent": config.botName }
 		};
 		request(options, function(error, response, body) {
 			if (!error && response.statusCode == 200) {
@@ -28,7 +28,7 @@ module.exports = {
 						var pr = prs[index];
 						options.url = pr._links.statuses.href.replace("/statuses/", "/status/");
 						request(options, function(error, response, body) {
-							result += "\n* [" + pr.title + "](" + pr.html_url + ")";
+							result += "\n* " + pr.title + " (" + pr.html_url + ")";
 							if (!error) {
 								var status = JSON.parse(body);
 								if (status.state == "failure") result += " :fire:";

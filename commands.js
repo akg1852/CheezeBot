@@ -19,7 +19,8 @@ fs.readdir("commands", function(error, files) {
 				var s = config.botName + " commands:\n```";
 				for (var i = 0; i < commands.length; i++) {
 					var command = commands[i];
-					if (command.synopsis && command.description) s += "\n" + pad(synopsisWidth + 2, command.synopsis) + command.description;
+					if (command.synopsis && command.description)
+						s += "\n" + command.synopsis + "\n\t" + command.description;
 				}
 				s += "\n```";
 				post(s, context, callback);

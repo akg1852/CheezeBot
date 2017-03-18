@@ -11,7 +11,9 @@ slack.connect = function connect(onconnect, onmessage) {
 		
 		if (!error && response.statusCode === 200) {
 			slack.data = JSON.parse(body);
-			slack.users = toAssoc(slack.data.users, 'id');
+			slack.users = toAssoc('id', slack.data.users);
+			slack.channels = toAssoc('id', slack.data.channels.concat(slack.data.groups, slack.data.ims));
+
 			slack.socket = new WebSocket(slack.data.url);
 			
 			slack.socket.onopen = function() {
@@ -46,9 +48,9 @@ slack.post = function post(reply, context, callback){
 		text: String(reply) || "[no reply]"
 	}));
 	
-	var channel = slack.data.channels.concat(slack.data.groups).find(function(c) { return c.id === context.channel; });
-	
-	console.log("\n---" + channel.name + "--- (" + now() + ")\n" + context.user.real_name + ": " + context.text);
+	var channel = slack.channels[context.channel];
+
+	console.log("\n---" + (channel.name || "<private message>")  + "--- (" + now() + ")\n" + context.user.real_name + ": " + context.text);
 	console.log(config.botName + ": " + reply + "\n");
 	if (callback) callback();
 }
@@ -76,7 +78,7 @@ function now() {
 }
 
 // generate associative array from array of objects
-function toAssoc(arr, keyName) {
+function toAssoc(keyName, arr) {
 	var result = {};
 	for (var i = 0; i < arr.length; i++) {
 		var item = arr[i];
