@@ -35,6 +35,7 @@ slack.connect = function connect(onconnect, onmessage) {
 		}
 		else {
 			console.log("slack authentication error");
+			setTimeout(connect, 2000);
 		}
 	});
 }
