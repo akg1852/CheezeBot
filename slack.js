@@ -1,4 +1,5 @@
 var config = require("./config.js");
+var utility = require("./utility.js");
 var request = require('request');
 var WebSocket = require('ws');
 
@@ -7,7 +8,7 @@ var slack = module.exports = {};
 // connect to slack real time messaging
 slack.connect = function connect(onconnect, onmessage) {
 	request(encodeURI('https://slack.com/api/rtm.start?token=' + config.slackToken), function(error, response, body) {
-		console.log("connecting to slack");
+		utility.log("connecting to slack");
 		
 		if (!error && response.statusCode === 200) {
 			slack.data = JSON.parse(body);
@@ -17,24 +18,24 @@ slack.connect = function connect(onconnect, onmessage) {
 			slack.socket = new WebSocket(slack.data.url);
 			
 			slack.socket.onopen = function() {
-				console.log('connected to slack');
+				utility.log('connected to slack');
 				onconnect();
 			};
 
 			slack.socket.onmessage = onmessage;
 
 			slack.socket.onclose = function() {
-				console.log("slack socket closed");
+				utility.log("slack socket closed");
 				setTimeout(connect, 2000);
 			};
 			
 			slack.socket.onerror = function(error) {
-				console.error("slack socket error: " + JSON.stringify(error));
+				utility.log("slack socket error: " + JSON.stringify(error));
 				setTimeout(connect, 2000);
 			};
 		}
 		else {
-			console.log("slack authentication error");
+			utility.log("slack authentication error");
 			setTimeout(connect, 2000);
 		}
 	});
@@ -50,9 +51,9 @@ slack.post = function post(reply, context, callback){
 	}));
 	
 	var channel = slack.channels[context.channel];
-
-	console.log("\n---" + (channel.name || "<private message>")  + "--- (" + now() + ")\n" + context.user.real_name + ": " + context.text);
-	console.log(config.botName + ": " + reply + "\n");
+	utility.log("(in " + (channel.name || "<private message>")  + ")\n" +
+		context.user.real_name + ": " + context.text + "\n" +
+		config.botName + ": " + reply);
 	if (callback) callback();
 }
 

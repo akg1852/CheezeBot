@@ -33,7 +33,7 @@ var when = module.exports = {
 		var whenColumns = "id INTEGER PRIMARY KEY, channel TEXT, time INTEGER, user TEXT, condition TEXT, command TEXT";
 		dbConnect(function(db) { db.run("CREATE TABLE IF NOT EXISTS 'when' (" + whenColumns + ")", function(error) {
 			if (error) {
-				console.error("Error creating 'when' table in database: " + JSON.stringify(error));
+				utility.log("Error creating 'when' table in database: " + JSON.stringify(error));
 			}
 			else {
 				callback();
@@ -52,7 +52,7 @@ var when = module.exports = {
 		dbConnect(function(db) {
 			db.run("INSERT INTO 'when' VALUES (?, ?, ?, ?, ?, ?)",
 				null, context.channel, query.time, query.user, query.condition, query.command, function(error) {
-				if (error) console.error("Error adding 'when' rules: " + JSON.stringify(error));
+				if (error) utility.log("Error adding 'when' rules: " + JSON.stringify(error));
 				else {
 					post("Thanks for the new 'when' rule!", context);
 					if (callback) callback(this.lastID);
@@ -71,11 +71,11 @@ var when = module.exports = {
 				"((user IS NULL AND $user IS NULL) OR user LIKE $user)", {
 				$channel: context.channel, $time: query.time, $condition: query.condition,
 				$user: query.user, $currentTime: (new Date()).getTime() }, function(error) {
-					if (error) console.error("Error deleting 'when' rules: " + JSON.stringify(error));
+					if (error) utility.log("Error deleting 'when' rules: " + JSON.stringify(error));
 					else if (this.changes) {
 						post(this.changes + " 'when' rule" + (this.changes > 1 ? "s" : "") + " deleted", context);
 					}
-					else console.log("no 'when' rules matching query, nothing deleted");
+					else utility.log("no 'when' rules matching query, nothing deleted");
 				}
 			);
 			// todo: allow delete when both row.time and query.time are prior to current time
@@ -85,9 +85,9 @@ var when = module.exports = {
 	deleteByID: function(id) {
 		dbConnect(function(db) {
 			db.run("DELETE FROM 'when' WHERE id = ?", id, function(error) {
-				if (error) console.error("Error deleting 'when' rule " + id + ": " + JSON.stringify(error));
-				else if (this.changes) console.log("deleted 'when' rule");
-				else console.log("no 'when' rule " + id + ", nothing deleted");
+				if (error) utility.log("Error deleting 'when' rule " + id + ": " + JSON.stringify(error));
+				else if (this.changes) utility.log("deleted 'when' rule");
+				else utility.log("no 'when' rule " + id + ", nothing deleted");
 			});
 		});
 	},
@@ -97,7 +97,7 @@ var when = module.exports = {
 		
 		dbConnect(function(db) {
 			db.all("SELECT * FROM 'when' WHERE time IS NOT NULL AND condition IS NULL", function(error, rows) {
-				if (error) console.error("Error retrieving delayed 'when' rules: " + JSON.stringify(error));
+				if (error) utility.log("Error retrieving delayed 'when' rules: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(callback);
 					loadedDelayed = true;
@@ -112,14 +112,14 @@ var when = module.exports = {
 				"channel = ? AND (time IS NULL OR time <= ?) AND (user IS NULL OR user LIKE ?)",
 				context.channel, (new Date()).getTime(), context.user.id, function(error, rows) {
 				var triggered = 0;
-				if (error) console.error("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
+				if (error) utility.log("Error retrieving 'when' rules for trigger: " + JSON.stringify(error));
 				else if (rows.length) {
 					rows.forEach(function(r) {
 						var match = (!r.condition || context.text.match(new RegExp(r.condition, "i")));
 						var now = (new Date()).getTime();
 						if (match) {
 							if (times[r.id] && (now - times[r.id] <= config.wheneverRefractorySeconds * 1000)) {
-								console.log("'when' rule " + r.id + " not run due to refractory period");
+								utility.log("'when' rule " + r.id + " not run due to refractory period");
 							}
 							else {
 								triggered++;
@@ -141,7 +141,7 @@ var when = module.exports = {
 			var day = 24 * 60 * 60 * 1000;
 			db.all("SELECT * FROM 'when' where channel = ? AND (time IS NULL OR (time - ?) < ?)",
 				context.channel, (new Date()).getTime(), day, function(error, rows) {
-				if (error) console.error("Error retrieving 'when' rules for list: " + JSON.stringify(error));
+				if (error) utility.log("Error retrieving 'when' rules for list: " + JSON.stringify(error));
 				else if (rows.length) {
 					var result = ["List of all today's 'when' rules in the current channel:"];
 					rows.forEach(function(r) {

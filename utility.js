@@ -46,6 +46,12 @@ var utility = module.exports = {
 		return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " +
 			d.getHours() + ":" + d.getMinutes();
 	},
+	
+	// log with timestamp
+	log: function(message) {
+		console.log("\n" + utility.now() + " - " + message);
+	},
+	
 	// pad string to length
 	pad: function(len, str) {
 		while (str.length < len) str += " ";
@@ -59,7 +65,7 @@ var utility = module.exports = {
 				successCallback();
 			}
 			else {
-				console.error("Error sending email: " + JSON.stringify(error));
+				utility.log("Error sending email: " + JSON.stringify(error));
 				if (failureCallback) failureCallback();
 			}
 		});

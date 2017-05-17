@@ -1,12 +1,12 @@
 var config = require("./config.js");
 var post = require("./slack.js").post;
 var when = require("./when.js");
-var pad = require("./utility.js").pad;
+var utility = require("./utility.js");
 var fs = require('fs');
 
 var commands = module.exports = [];
 fs.readdir("commands", function(error, files) {
-	if (error) console.error("Error listing command files: " + JSON.stringify(error) + "\n");
+	if (error) utility.log("Error listing command files: " + JSON.stringify(error) + "\n");
 	else {
 		
 		// 'help' message

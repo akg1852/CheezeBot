@@ -3,13 +3,14 @@ var config = require("./config.js");
 var commands = require("./commands.js");
 var when = require("./when.js");
 var slack = require("./slack.js");
+var utility = require("./utility.js");
 
 var stream = {};
 
 if (cluster.isMaster) {
 	cluster.fork();
 	cluster.on('exit', function(worker, code, signal) {
-		console.log("restarting app");
+		utility.log("restarting app");
 		setTimeout(cluster.fork, 2000);
 	});
 }
