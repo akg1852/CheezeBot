@@ -43,6 +43,8 @@ slack.connect = function connect(onconnect, onmessage) {
 
 // post reply
 slack.post = function post(reply, context, callback){
+	if (!context) return utility.log('Post called without context');
+	
 	slack.socket.send(JSON.stringify({
 		type: 'message',
 		channel: context.channel,
