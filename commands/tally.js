@@ -24,7 +24,6 @@ module.exports = {
 					context, callback);
 				}
 				else if (match.list) {
-					console.log(match.item);
 					db.all("SELECT " + match.item + " FROM tally GROUP BY " + match.item, function(error, rows) {
 						if (error) console.error("Error reading tally list: " + JSON.stringify(error));
 						else if (rows.length) {
