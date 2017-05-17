@@ -71,13 +71,6 @@ slack.decodeControlChars = function(s) {
 	return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 }
 
-// current date and time string
-function now() {
-	var d = new Date();
-	return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " +
-		d.getHours() + ":" + d.getMinutes();
-}
-
 // generate associative array from array of objects
 function toAssoc(keyName, arr) {
 	var result = {};

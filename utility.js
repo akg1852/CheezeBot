@@ -1,4 +1,3 @@
-var post = require("./slack.js").post;
 var sqlite3 = require('sqlite3').verbose();
 
 var utility = module.exports = {
@@ -41,6 +40,12 @@ var utility = module.exports = {
 		return t.getHours() + ":" + ("0" + t.getMinutes()).substr(-2);
 	},
 	
+	// current date and time string
+	now: function() {
+		var d = new Date();
+		return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " +
+			d.getHours() + ":" + d.getMinutes();
+	},
 	// pad string to length
 	pad: function(len, str) {
 		while (str.length < len) str += " ";
@@ -48,20 +53,14 @@ var utility = module.exports = {
 	},
 	
 	// send an email
-	email: function(email, context, callback) {
+	email: function(email, context, successCallback, failureCallback) {
 		require('nodemailer').createTransport().sendMail(email, function(error, info) {
-			if (!error) {
-				var result = (info.rejected.length > 0) ? "Failed to send email" : "Email sent";
-				if (context) post(result, context, callback);
-				else {
-					console.log(result);
-					if (callback) callback();
-				}
+			if (!error && info.rejected.length === 0) {
+				successCallback();
 			}
 			else {
-				if (context) post("Unable to send email", context);
-				console.error("Error sending email: " + JSON.stringify(error) + "\n");
-				if (callback) callback();
+				console.error("Error sending email: " + JSON.stringify(error));
+				if (failureCallback) failureCallback();
 			}
 		});
 	},
