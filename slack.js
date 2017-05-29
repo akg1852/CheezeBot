@@ -7,6 +7,8 @@ var slack = module.exports = {};
 
 // connect to slack real time messaging
 slack.connect = function connect(onconnect, onmessage) {
+	var reconnect = function() { connect(onconnect, onmessage); };
+	
 	request(encodeURI('https://slack.com/api/rtm.start?token=' + config.slackToken), function(error, response, body) {
 		utility.log("connecting to slack");
 		
@@ -26,17 +28,17 @@ slack.connect = function connect(onconnect, onmessage) {
 
 			slack.socket.onclose = function() {
 				utility.log("slack socket closed");
-				setTimeout(connect, 2000);
+				setTimeout(reconnect, 2000);
 			};
 			
 			slack.socket.onerror = function(error) {
 				utility.log("slack socket error: " + JSON.stringify(error));
-				setTimeout(connect, 2000);
+				setTimeout(reconnect, 2000);
 			};
 		}
 		else {
 			utility.log("slack authentication error");
-			setTimeout(connect, 2000);
+			setTimeout(reconnect, 2000);
 		}
 	});
 }
