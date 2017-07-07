@@ -43,8 +43,9 @@ var utility = module.exports = {
 	// current date and time string
 	now: function() {
 		var d = new Date();
+		var z = function(n) { var pre = n < 10 ? '0' : ''; return pre + n; };
 		return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " +
-			d.getHours() + ":" + d.getMinutes();
+			d.getHours() + ":" + z(d.getMinutes()) + ":" + z(d.getSeconds());
 	},
 	
 	// log with timestamp
