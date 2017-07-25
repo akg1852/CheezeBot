@@ -1,4 +1,4 @@
-CheezeBot is a Slack / FlowDock bot created by Adam Gray.
+CheezeBot is a Slack bot created by Adam Gray.
 
 Once you have cloned the project, setup involves making some changes:
 
@@ -20,4 +20,4 @@ Once you have cloned the project, setup involves making some changes:
 Now you're ready to run the bot:
 
 * run `npm install` to install the required packages
-* run `node index.js` to start the bot
+* open a bash terminal and run `start.sh` to start the bot

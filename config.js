@@ -14,6 +14,7 @@ module.exports = {
 		"Wolfram Alpha: http://products.wolframalpha.com/api/"
 		].join("\n"),
 	wheneverRefractorySeconds: 5,
+	restartMinutes: 60,
 	
 	// COMMAND CONFIG:
 	githubToken: "",
