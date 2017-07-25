@@ -1,4 +1,5 @@
 var config = require("../config.js");
+var utility = require("../utility.js");
 var post = require("../slack.js").post;
 var request = require('request');
 
@@ -42,7 +43,7 @@ module.exports = {
 				else post("no open pull requests for " + repo + (branch ? " (" + branch + ")" : ""), context, callback);
 			}
 			else {
-				console.error("Error requesting github data: " + JSON.stringify(error || response) + "\n");
+				utility.log("Error requesting github data: " + JSON.stringify(error || response) + "\n");
 			}
 		});
 	}

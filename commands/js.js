@@ -1,7 +1,7 @@
 var config = require("../config.js");
 var slack = require("../slack.js");
 var post = slack.post;
-var dbConnect = require("../utility.js").dbConnect;
+var utility = require("../utility.js");
 var commands = require("../commands.js");
 var sandbox = new (require("sandbox"))();
 
@@ -14,21 +14,21 @@ module.exports = {
 	priority: -10,
 	reply: function(match, context, callback) {
 		var name = match[5], params = match[6], code = match[7];
-		dbConnect(function(db) {
+		utility.dbConnect(function(db) {
 			db.run("CREATE TABLE IF NOT EXISTS js" +
 				"(name TEXT, params TEXT, code TEXT, deleted INTEGER)", function(error) {
 				
 				function deleteFunction(name, callback) {
 					db.run("UPDATE js SET deleted = 1 WHERE deleted = 0 AND name = ?", name, function(error) {
 						if (error) {
-							console.error("Error deleting js function '" + name + "': " + JSON.stringify(error));
+							utility.log("Error deleting js function '" + name + "': " + JSON.stringify(error));
 						}
 						else callback.call(this);
 					});
 				}
 				
 				if (error) {
-					console.error("Error creating js table in database: " + JSON.stringify(error));
+					utility.log("Error creating js table in database: " + JSON.stringify(error));
 				}
 				else if (match[1]) { // help
 					post(["User-defined javascript functions!\n",
@@ -55,7 +55,7 @@ module.exports = {
 				if (match[2]) { // list functions
 					db.all("SELECT * FROM js WHERE deleted = 0", function(error, rows) {
 						if (error) {
-							console.error("Error retrieving js functions from db: " + JSON.stringify(error));
+							utility.log("Error retrieving js functions from db: " + JSON.stringify(error));
 						}
 						else if (rows.length) {
 							var result = ["List of all user-defined js functions:"];
@@ -80,7 +80,7 @@ module.exports = {
 					deleteFunction(name, function() {
 						db.run("INSERT INTO js VALUES (?, ?, ?, 0)", name, params || "", code, function(error) {
 							if (error) {
-								console.error("Error updating js table: " + JSON.stringify(error));
+								utility.log("Error updating js table: " + JSON.stringify(error));
 							}
 							else post("Thanks for the new function.", context, callback);
 						});
@@ -92,7 +92,7 @@ module.exports = {
 				else if (name) { // call (or print) function
 					db.get("SELECT * FROM js WHERE deleted = 0 AND name = ?", name, function(error, row) {
 						if (error) {
-							console.error("Error reading js table: " + JSON.stringify(error));
+							utility.log("Error reading js table: " + JSON.stringify(error));
 						}
 						else if (row) {
 							if (typeof params == "string") callFunction(row.params, params, row.code, context, callback); // call

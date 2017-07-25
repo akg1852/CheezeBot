@@ -32,13 +32,13 @@ module.exports = {
 									}
 									else post("No weather information found", context, callback);
 								}
-								else console.error("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
+								else utility.log("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
 							});
 					}
 					else post("No city found matching search", context, callback);
 				}
 				else {
-					console.error("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
+					utility.log("Error requesting weather information: " + JSON.stringify(error || response) + "\n");
 				}
 			});
 		}

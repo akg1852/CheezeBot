@@ -1,4 +1,4 @@
-var dbConnect = require("../utility.js").dbConnect;
+var utility = require("../utility.js");
 var post = require("../slack.js").post;
 
 module.exports = {
@@ -11,10 +11,10 @@ module.exports = {
 		match.member = match.pivot ? m[4] : m[5];
 		match.item = match.pivot ? "member" : "category";
 		
-		dbConnect(function(db) {
+		utility.dbConnect(function(db) {
 			db.run("CREATE TABLE IF NOT EXISTS tally" +
 				"(category TEXT, member TEXT, count INT, PRIMARY KEY (category, member))", function(error) {
-				if (error) console.error("Error creating tally table in database: " + JSON.stringify(error));
+				if (error) utility.log("Error creating tally table in database: " + JSON.stringify(error));
 				else if (match.help) {
 					post(["Tally command:",
 						"`tally {category} [{member} [++|--|+= n|-= n]]`",
@@ -25,7 +25,7 @@ module.exports = {
 				}
 				else if (match.list) {
 					db.all("SELECT " + match.item + " FROM tally GROUP BY " + match.item, function(error, rows) {
-						if (error) console.error("Error reading tally list: " + JSON.stringify(error));
+						if (error) utility.log("Error reading tally list: " + JSON.stringify(error));
 						else if (rows.length) {
 							var result = ["Tally " + match.item + " list:"].concat(rows.map(function(r) { return r[match.item] })).join("\n* ");
 							post(result, context, callback);
@@ -43,16 +43,16 @@ module.exports = {
 							post("Tally for " + match.item + " '" + match[match.item] + "':" + result, context, callback);
 						};
 						
-						if (error) console.error("Error reading tally: " + JSON.stringify(error));
+						if (error) utility.log("Error reading tally: " + JSON.stringify(error));
 						else if (match.command) {
 							var count = rows.length ? rows[0].count : 0;
 							eval("count" + match.command);
 							db.run("DELETE FROM tally WHERE category LIKE ? AND member LIKE ?", match.category, match.member, function(error) {
-								if (error) console.error("Error deleting tally: " + JSON.stringify(error));
+								if (error) utility.log("Error deleting tally: " + JSON.stringify(error));
 								else if (count) {
 									db.run("INSERT INTO tally VALUES (?, ?, ?)", match.category, match.member, count, function(error) {
 										if (error) {
-											console.error("Error updating tally: " + JSON.stringify(error));
+											utility.log("Error updating tally: " + JSON.stringify(error));
 										}
 										else postTally([{category: match.category, member: match.member, count: count}]);
 									});

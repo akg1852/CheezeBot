@@ -1,4 +1,5 @@
 var post = require("../slack.js").post;
+var utility = require("../utility.js");
 var request = require('request');
 
 module.exports = {
@@ -15,7 +16,7 @@ module.exports = {
 					else post("No suitable gif found - try a different search", context, callback);
 				}
 				else {
-					console.error("Error requesting gif: " + JSON.stringify(error || response) + "\n");
+					utility.log("Error requesting gif: " + JSON.stringify(error || response) + "\n");
 				}
 			});
 	}

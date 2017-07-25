@@ -1,4 +1,5 @@
 var config = require("../config.js");
+var utility = require("../utility.js");
 var post = require("../slack.js").post;
 var request = require('request');
 var xml2js = require('xml2js');
@@ -24,7 +25,7 @@ module.exports = {
 					});
 				}
 				else {
-					console.error("Error requesting wolfram alpha information: " + JSON.stringify(error || response) + "\n");
+					utility.log("Error requesting wolfram alpha information: " + JSON.stringify(error || response) + "\n");
 				}
 			});
 	}
