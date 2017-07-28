@@ -44,6 +44,7 @@ slack.connect = function(onconnect, onmessage) {
 // post reply
 slack.post = function post(reply, context, callback){
 	if (!context) return utility.log('Post called without context');
+	if (typeof(context) === 'string') context = { channel: context };
 	
 	slack.socket.send(JSON.stringify({
 		type: 'message',
@@ -54,7 +55,7 @@ slack.post = function post(reply, context, callback){
 	
 	var channel = slack.channels[context.channel];
 	utility.log("(in " + (channel.name || "<private message>")  + ")\n" +
-		context.user.real_name + ": " + context.text + "\n" +
+		(context.user ? (context.user.real_name + ": " + context.text + "\n") : "") +
 		config.botName + ": " + reply);
 	if (callback) callback();
 }
