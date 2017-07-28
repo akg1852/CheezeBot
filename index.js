@@ -15,8 +15,9 @@ when.createDB(function() {
 
 	slack.connect(
 	
-	// get delayed commands
+	// onconnect:
 	function() {
+		// get delayed commands
 		when.getDelayed(function(r) {
 			setTimeout(function() {
 				commands.execute(r.command, {
@@ -28,7 +29,7 @@ when.createDB(function() {
 			}, r.time - (new Date()).getTime());
 		});
 	},
-	// listen for messages
+	// onmessage:
 	function(event) {
 		var context = JSON.parse(event.data);
 		if (context.user) context.user = slack.users[context.user];
