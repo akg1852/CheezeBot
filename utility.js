@@ -78,4 +78,9 @@ var utility = module.exports = {
 		callback(db);
 		db.close();
 	},
+	
+	// return random item from an array
+	random: function(array) {
+		return array[Math.floor(Math.random() * array.length)];
+	},
 }

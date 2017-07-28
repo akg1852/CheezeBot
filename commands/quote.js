@@ -29,7 +29,7 @@ module.exports = {
 							utility.log("Error reading quote: " + JSON.stringify(error));
 						}
 						else if (!rows.length) post("No quotes available.", context, callback);
-						else post(rows[Math.floor(Math.random() * rows.length)].quote, context, callback);
+						else post(utility.random(rows).quote, context, callback);
 					});
 				}
 			});
